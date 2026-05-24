@@ -1,0 +1,34 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: oklch(0.13 0.02 270);
+  --color-bg-elevated: oklch(0.17 0.025 270);
+  --color-fg: oklch(0.96 0.01 270);
+  --color-fg-muted: oklch(0.65 0.02 270);
+  --color-accent: oklch(0.78 0.18 65);
+  --color-accent-soft: oklch(0.88 0.12 65);
+  --color-border: oklch(0.25 0.02 270);
+
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-display: "Inter", system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    background: var(--color-bg);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background: var(--color-accent);
+    color: var(--color-bg);
+  }
+}

@@ -1,0 +1,41 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.*
+
+# next.js
+.next/
+out/
+build/
+dist/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# env
+.env*
+!.env.example
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# editor / OS
+.DS_Store
+.vscode/
+.idea/
+*.swp
+
+# personal working area — memory, scratch, notes, archive (gitignored)
+workspace/
+
+# local claude config
+CLAUDE.md
+.claude/settings.local.json
+.claude/commands.bak/
+
+# vercel
+.vercel

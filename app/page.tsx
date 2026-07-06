@@ -1,11 +1,13 @@
 import { bio } from "@/data/bio";
 import { Hero } from "@/components/landing/Hero";
+import { IntroOverlay } from "@/components/landing/IntroOverlay";
 import { PathChooser } from "@/components/landing/PathChooser";
 import HeroBackground from "@/components/three/HeroBackgroundClient";
 
 export default function LandingPage() {
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-6 py-16">
+      <IntroOverlay />
       <HeroBackground />
       <div
         aria-hidden
@@ -20,6 +22,7 @@ export default function LandingPage() {
         Choose your path. Or just say hi —{" "}
         <a
           href={`mailto:${bio.contact.email}`}
+          data-cursor="hover"
           className="text-[--color-accent] underline-offset-4 hover:underline"
         >
           {bio.contact.email}

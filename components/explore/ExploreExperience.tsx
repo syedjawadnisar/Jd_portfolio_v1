@@ -3,11 +3,11 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useLenis } from "@/lib/lenis";
-import { ScrollScene } from "./ScrollScene";
+import ScrollScene from "./ScrollSceneClient";
 import { Section } from "./Section";
 import { skillCategories } from "@/data/skills";
 import { featuredProjects } from "@/data/projects";
-import { bio } from "@/data/bio";
+import { JourneyFooter } from "@/components/footer/JourneyFooter";
 
 const easeOut = [0.22, 1, 0.36, 1] as const;
 
@@ -21,6 +21,7 @@ export function ExploreExperience() {
       {/* Top nav-back, fixed so it's always reachable */}
       <Link
         href="/"
+        data-cursor="hover"
         className="fixed left-6 top-6 z-50 text-xs uppercase tracking-widest text-[--color-fg-muted] transition-colors hover:text-[--color-accent]"
       >
         ← back
@@ -155,57 +156,8 @@ export function ExploreExperience() {
         </p>
       </Section>
 
-      {/* Section 7 — CTA / footer */}
-      <section className="relative flex min-h-screen flex-col items-center justify-center px-6 py-24">
-        <motion.div
-          className="w-full max-w-3xl text-center"
-          initial={{ opacity: 0, y: 32 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.4 }}
-          transition={{ duration: 0.85, ease: easeOut }}
-        >
-          <p className="mb-4 text-xs uppercase tracking-[0.3em] text-[--color-fg-muted]">
-            End of page
-          </p>
-          <h2 className="text-balance text-4xl font-semibold leading-[1.05] tracking-tight md:text-6xl">
-            Start of a journey together to success.
-          </h2>
-          <p className="mx-auto mt-6 max-w-xl text-balance text-base text-[--color-fg-muted] md:text-lg">
-            Tell me what you&apos;re trying to build. I&apos;ll tell you whether
-            I&apos;m the one to ship it.
-          </p>
-
-          <div className="mt-10 flex flex-col items-center gap-3">
-            <a
-              href={`mailto:${bio.contact.email}`}
-              className="rounded-full border border-[--color-accent] bg-[--color-accent]/10 px-8 py-3 text-sm font-medium uppercase tracking-[0.2em] text-[--color-accent] transition-colors hover:bg-[--color-accent]/20"
-            >
-              {bio.contact.email}
-            </a>
-            <div className="mt-4 flex gap-6 text-sm text-[--color-fg-muted]">
-              <a
-                href={bio.contact.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-[--color-accent]"
-              >
-                LinkedIn
-              </a>
-              <a
-                href={bio.contact.github}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-[--color-accent]"
-              >
-                GitHub
-              </a>
-              <Link href="/" className="hover:text-[--color-accent]">
-                Home
-              </Link>
-            </div>
-          </div>
-        </motion.div>
-      </section>
+      {/* Section 7 — Journey footer + contact game */}
+      <JourneyFooter />
     </main>
   );
 }

@@ -9,8 +9,8 @@
   --color-accent-soft: oklch(0.88 0.12 65);
   --color-border: oklch(0.25 0.02 270);
 
-  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
-  --font-display: "Inter", system-ui, sans-serif;
+  --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
+  --font-display: var(--font-instrument-serif), Georgia, serif;
 }
 
 @layer base {
@@ -25,6 +25,20 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+  }
+
+  /* Hide native cursor for mouse users; preserved on touch / coarse pointers */
+  @media (pointer: fine) {
+    html,
+    body {
+      cursor: none;
+    }
+    a,
+    button,
+    [role="button"],
+    [data-cursor] {
+      cursor: none;
+    }
   }
 
   ::selection {

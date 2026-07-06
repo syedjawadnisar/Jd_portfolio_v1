@@ -36,6 +36,7 @@ workspace/
 CLAUDE.md
 .claude/settings.local.json
 .claude/commands.bak/
+.claude/commands/
 
 # vercel
 .vercel

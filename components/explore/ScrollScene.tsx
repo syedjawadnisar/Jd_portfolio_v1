@@ -5,9 +5,15 @@ import { Float } from "@react-three/drei";
 import { Suspense, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { getScrollProgress } from "@/lib/lenis";
+import {
+  SilkPlane,
+  usePrefersReducedMotion,
+} from "@/components/three/SilkBackground";
 
-function ParticleSphere({ count = 6000 }: { count?: number }) {
+// 3000 keeps the combined silk + particles scene at 60fps.
+function ParticleSphere({ count = 3000 }: { count?: number }) {
   const ref = useRef<THREE.Points>(null);
+  const reduced = usePrefersReducedMotion();
 
   const geometry = useMemo(() => {
     const geo = new THREE.BufferGeometry();
@@ -27,8 +33,9 @@ function ParticleSphere({ count = 6000 }: { count?: number }) {
   useFrame((state) => {
     if (!ref.current) return;
     const p = getScrollProgress();
-    const t = state.clock.elapsedTime;
-    // base drift + scroll-driven full rotation
+    // Ambient time-based drift is gated by prefers-reduced-motion; the
+    // scroll-driven rotation stays — it only moves when the user does.
+    const t = reduced ? 0 : state.clock.elapsedTime;
     ref.current.rotation.y = t * 0.04 + p * Math.PI * 2.2;
     ref.current.rotation.x = Math.sin(t * 0.08) * 0.06 + p * Math.PI * 0.6;
   });
@@ -49,6 +56,7 @@ function ParticleSphere({ count = 6000 }: { count?: number }) {
 
 function CenterCore() {
   const ref = useRef<THREE.Group>(null);
+  const reduced = usePrefersReducedMotion();
 
   useFrame(() => {
     if (!ref.current) return;
@@ -60,28 +68,40 @@ function CenterCore() {
     ref.current.scale.setScalar(s);
   });
 
+  const core = (
+    <>
+      <mesh>
+        <icosahedronGeometry args={[1.3, 1]} />
+        <meshBasicMaterial
+          color="#f5d39a"
+          wireframe
+          transparent
+          opacity={0.45}
+        />
+      </mesh>
+      <mesh>
+        <icosahedronGeometry args={[1.55, 0]} />
+        <meshBasicMaterial
+          color="#a8c8ff"
+          wireframe
+          transparent
+          opacity={0.18}
+        />
+      </mesh>
+    </>
+  );
+
+  // Float is a continuous ambient animation — skip it under reduced motion;
+  // scroll-driven rotation above remains.
   return (
     <group ref={ref}>
-      <Float speed={1.2} rotationIntensity={0.25} floatIntensity={0.3}>
-        <mesh>
-          <icosahedronGeometry args={[1.3, 1]} />
-          <meshBasicMaterial
-            color="#f5d39a"
-            wireframe
-            transparent
-            opacity={0.45}
-          />
-        </mesh>
-        <mesh>
-          <icosahedronGeometry args={[1.55, 0]} />
-          <meshBasicMaterial
-            color="#a8c8ff"
-            wireframe
-            transparent
-            opacity={0.18}
-          />
-        </mesh>
-      </Float>
+      {reduced ? (
+        core
+      ) : (
+        <Float speed={1.2} rotationIntensity={0.25} floatIntensity={0.3}>
+          {core}
+        </Float>
+      )}
     </group>
   );
 }
@@ -109,7 +129,7 @@ export function ScrollScene() {
     <div className="pointer-events-none fixed inset-0 -z-10">
       <Canvas
         camera={{ position: [0, 0, 7], fov: 55 }}
-        dpr={[1, 2]}
+        dpr={[1, 1.75]}
         gl={{
           antialias: true,
           alpha: true,
@@ -117,6 +137,7 @@ export function ScrollScene() {
         }}
       >
         <Suspense fallback={null}>
+          <SilkPlane variant="deep" />
           <ParticleSphere />
           <CenterCore />
           <CameraDolly />

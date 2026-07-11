@@ -2,16 +2,16 @@ import { bio } from "@/data/bio";
 import { Hero } from "@/components/landing/Hero";
 import { IntroOverlay } from "@/components/landing/IntroOverlay";
 import { PathChooser } from "@/components/landing/PathChooser";
-import HeroBackground from "@/components/three/HeroBackgroundClient";
+import SilkBackground from "@/components/three/SilkBackgroundClient";
 
 export default function LandingPage() {
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-6 py-16">
       <IntroOverlay />
-      <HeroBackground />
+      <SilkBackground variant="calm" floaters />
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_30%,oklch(0.22_0.04_270/0.55),transparent_60%)]"
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_30%,color-mix(in_oklch,var(--color-bg-elevated)_55%,transparent),transparent_60%)]"
       />
 
       <Hero />

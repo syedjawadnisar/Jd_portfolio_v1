@@ -18,10 +18,10 @@ export const bio = {
 export const paths = [
   {
     href: "/cinematic",
-    title: "I have 60 seconds",
+    title: "I have a minute",
     label: "Cinematic Auto-Play",
     description: "Hands-free. Highlights only. The fastest path to “let’s talk.”",
-    duration: "~60s",
+    duration: "~50s",
   },
   {
     href: "/explore",

@@ -3,9 +3,9 @@ import { CinematicExperience } from "@/components/cinematic/CinematicExperience"
 import { JourneyFooter } from "@/components/footer/JourneyFooter";
 
 export const metadata: Metadata = {
-  title: "60 Seconds — Jawad Nisar",
+  title: "The 50-Second Cut — Jawad Nisar",
   description:
-    "The hands-free cinematic cut: who, what, and why — in one minute.",
+    "The hands-free cinematic cut: who, what, and why — in under a minute.",
 };
 
 export default function CinematicPage() {

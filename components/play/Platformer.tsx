@@ -13,8 +13,9 @@ import { KeyboardControls } from "@react-three/drei";
 import { Physics } from "@react-three/rapier";
 import { AnimatePresence, motion, useMotionValue } from "framer-motion";
 import * as THREE from "three";
-import { Level, layouts } from "./Level";
+import { Level } from "./Level";
 import { Player } from "./Player";
+import type { StageDef } from "./stages";
 import {
   keyboardMap,
   TouchControls,
@@ -56,12 +57,12 @@ function FlagIcon() {
 }
 
 type PlatformerProps = {
-  layoutIndex: number;
+  stage: StageDef;
   onFinish: () => void;
 };
 
-export function Platformer({ layoutIndex, onFinish }: PlatformerProps) {
-  const layout = layouts[layoutIndex % layouts.length];
+export function Platformer({ stage, onFinish }: PlatformerProps) {
+  const { layout, theme } = stage;
   const touch = useRef<TouchState>({ left: false, right: false, jump: false });
   const tracker = useRef<PlayerTracker>({ x: 0, y: 1.6, vx: 0 });
   const progress = useMotionValue(0);
@@ -102,11 +103,12 @@ export function Platformer({ layoutIndex, onFinish }: PlatformerProps) {
           dpr={[1, 1.75]}
           gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
         >
+          <fog attach="fog" args={[theme.fog, 20, 55]} />
           <ambientLight intensity={0.65} />
-          <directionalLight position={[6, 10, 6]} intensity={1.3} />
+          <directionalLight position={[6, 10, 6]} intensity={1.3} color={theme.light} />
           <Suspense fallback={null}>
             <Physics gravity={[0, -22, 0]} paused={paused}>
-              <Level layout={layout} onFinish={handleFinish} />
+              <Level layout={layout} theme={theme} onFinish={handleFinish} />
               <Player
                 touch={touch}
                 tracker={tracker}
@@ -128,7 +130,7 @@ export function Platformer({ layoutIndex, onFinish }: PlatformerProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.7, ease: easeOut }}
         >
-          Reach the flag.
+          {stage.course.title}
         </motion.h2>
         <motion.p
           className="mt-2 text-xs uppercase tracking-[0.25em] text-[--color-fg-muted]"
@@ -136,7 +138,7 @@ export function Platformer({ layoutIndex, onFinish }: PlatformerProps) {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5, duration: 0.7 }}
         >
-          Four obstacles between you and the reward
+          {stage.course.subtitle}
         </motion.p>
       </div>
 
@@ -160,11 +162,11 @@ export function Platformer({ layoutIndex, onFinish }: PlatformerProps) {
           <span className="h-2 w-2 shrink-0 rounded-full bg-[--color-fg-muted]" />
           <div className="relative h-1 flex-1 overflow-hidden rounded-full bg-[--color-border]">
             <motion.div
-              className="absolute inset-y-0 left-0 w-full origin-left rounded-full bg-[--color-accent]"
+              className="absolute inset-y-0 left-0 w-full origin-left rounded-full bg-[--stage-accent]"
               style={{ scaleX: progress }}
             />
           </div>
-          <span className="shrink-0 text-[--color-accent]">
+          <span className="shrink-0 text-[--stage-accent]">
             <FlagIcon />
           </span>
         </div>

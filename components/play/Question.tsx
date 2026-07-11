@@ -2,24 +2,22 @@
 
 import { useState, type FormEvent } from "react";
 import { motion } from "framer-motion";
-import { classifyFreeText, type Answer, type RoundDef } from "./questions";
+import { classifyFreeText, type StageChip, type StageDef } from "./stages";
 
 const easeOut = [0.22, 1, 0.36, 1] as const;
 
 type QuestionProps = {
-  round: RoundDef;
-  roundIndex: number;
-  eyebrow: string;
-  onAnswer: (answer: Answer) => void;
+  stage: StageDef;
+  onAnswer: (chip: StageChip) => void;
 };
 
-export function Question({ round, roundIndex, eyebrow, onAnswer }: QuestionProps) {
+export function Question({ stage, onAnswer }: QuestionProps) {
   const [text, setText] = useState("");
 
   const submitFreeText = (e: FormEvent) => {
     e.preventDefault();
     if (!text.trim()) return;
-    onAnswer(classifyFreeText(text, roundIndex));
+    onAnswer(classifyFreeText(text, stage));
   };
 
   return (
@@ -30,7 +28,7 @@ export function Question({ round, roundIndex, eyebrow, onAnswer }: QuestionProps
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: easeOut }}
       >
-        {eyebrow}
+        {stage.eyebrow}
       </motion.p>
 
       <motion.h1
@@ -39,17 +37,17 @@ export function Question({ round, roundIndex, eyebrow, onAnswer }: QuestionProps
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1, duration: 0.85, ease: easeOut }}
       >
-        {round.question}
+        {stage.question}
       </motion.h1>
 
       <div className="mt-12 flex max-w-2xl flex-wrap items-center justify-center gap-3">
-        {round.chips.map((chip, i) => (
+        {stage.chips.map((chip, i) => (
           <motion.button
             key={chip.label}
             type="button"
             data-cursor="hover"
             onClick={() => onAnswer(chip)}
-            className="rounded-full border border-[--color-border] bg-[--color-bg-elevated]/60 px-5 py-2.5 text-sm text-[--color-fg] backdrop-blur-sm transition-colors duration-300 hover:border-[--color-accent] hover:text-[--color-accent]"
+            className="rounded-full border border-[--color-border] bg-[--color-bg-elevated]/60 px-5 py-2.5 text-sm text-[--color-fg] backdrop-blur-sm transition-colors duration-300 hover:border-[--stage-accent] hover:text-[--stage-accent]"
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.35 + i * 0.07, duration: 0.55, ease: easeOut }}
@@ -85,16 +83,16 @@ export function Question({ round, roundIndex, eyebrow, onAnswer }: QuestionProps
           type="text"
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder={round.placeholder}
+          placeholder={stage.placeholder}
           data-cursor="hover"
           autoComplete="off"
-          className="w-full border-b border-[--color-border] bg-transparent px-1 py-2.5 text-center text-sm text-[--color-fg] outline-none transition-colors placeholder:text-[--color-fg-muted]/60 focus:border-[--color-accent]"
+          className="w-full border-b border-[--color-border] bg-transparent px-1 py-2.5 text-center text-sm text-[--color-fg] outline-none transition-colors placeholder:text-[--color-fg-muted]/60 focus:border-[--stage-accent]"
         />
         <button
           type="submit"
           data-cursor="hover"
           aria-label="Submit your answer"
-          className="shrink-0 rounded-full border border-[--color-border] px-4 py-2 text-sm text-[--color-fg-muted] transition-colors hover:border-[--color-accent] hover:text-[--color-accent]"
+          className="shrink-0 rounded-full border border-[--color-border] px-4 py-2 text-sm text-[--color-fg-muted] transition-colors hover:border-[--stage-accent] hover:text-[--stage-accent]"
         >
           →
         </button>

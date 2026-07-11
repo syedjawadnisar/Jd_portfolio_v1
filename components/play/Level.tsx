@@ -1,62 +1,40 @@
 "use client";
 
-import { useRef } from "react";
+import { useCallback, useMemo, useRef, type ReactNode } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Float } from "@react-three/drei";
-import { CuboidCollider, RigidBody } from "@react-three/rapier";
+import {
+  BallCollider,
+  CuboidCollider,
+  RigidBody,
+  type CollisionEnterPayload,
+  type RapierRigidBody,
+} from "@react-three/rapier";
 import * as THREE from "three";
+import { usePrefersReducedMotion } from "@/components/three/SilkBackground";
+import type { LevelLayout, StageTheme } from "./stages";
 
-/**
- * Side-view level described as data so reruns can remix the layout.
- * Ground tops sit at y = 0. Everything lives on the z = 0 plane.
- */
-export type LevelLayout = {
-  finishX: number;
-  /** Ground strips: center x + width. Space between strips = a gap obstacle. */
-  grounds: { cx: number; w: number }[];
-  /** Fixed cuboid obstacles: center x/y, width, height, optional z-rotation (ramp). */
-  blocks: { cx: number; cy: number; w: number; h: number; rot?: number }[];
-};
+/** Launch velocity from a bounce pad — apex ~5.1 with gravity 22. */
+const PAD_LAUNCH_VELOCITY = 15;
+const PAD_HEIGHT = 0.24;
+/** Clamp per-frame time so sine-driven bodies don't leap after a hidden tab. */
+const MAX_STEP = 0.05;
 
-export const layouts: LevelLayout[] = [
-  {
-    // Run 1 — box, ramp, gap, pillar
-    finishX: 33,
-    grounds: [
-      { cx: 4.5, w: 21 }, // -6 .. 15
-      { cx: 29.5, w: 22 }, // 18.5 .. 40.5
-    ],
-    blocks: [
-      { cx: 6, cy: 0.55, w: 1.1, h: 1.1 }, // crate
-      { cx: 10.8, cy: 0.28, w: 3.2, h: 0.4, rot: 0.3 }, // ramp
-      { cx: 25, cy: 0.75, w: 1.2, h: 1.5 }, // pillar
-    ],
-  },
-  {
-    // Run 2 remix — pillar, gap, stair pair, crate
-    finishX: 31.5,
-    grounds: [
-      { cx: 2, w: 16 }, // -6 .. 10
-      { cx: 26.8, w: 27 }, // 13.3 .. 40.3
-    ],
-    blocks: [
-      { cx: 5, cy: 0.7, w: 1.1, h: 1.4 }, // pillar
-      { cx: 18, cy: 0.4, w: 1.4, h: 0.8 }, // stair low
-      { cx: 19.4, cy: 0.7, w: 1.4, h: 1.4 }, // stair high
-      { cx: 25.5, cy: 0.55, w: 1.2, h: 1.1 }, // crate
-    ],
-  },
-];
-
-const GROUND_COLOR = "#20202b";
-const BLOCK_COLOR = "#2e2e3d";
-const ACCENT = "#e8b464";
-
-function FinishFlag({ x, onFinish }: { x: number; onFinish: () => void }) {
+function FinishFlag({
+  x,
+  theme,
+  reduced,
+  onFinish,
+}: {
+  x: number;
+  theme: StageTheme;
+  reduced: boolean;
+  onFinish: () => void;
+}) {
   const cloth = useRef<THREE.Group>(null);
 
   useFrame(({ clock }) => {
-    if (!cloth.current) return;
+    if (!cloth.current || reduced) return;
     cloth.current.rotation.y = Math.sin(clock.elapsedTime * 2.1) * 0.22;
   });
 
@@ -81,8 +59,8 @@ function FinishFlag({ x, onFinish }: { x: number; onFinish: () => void }) {
         <mesh position={[0.5, 0, 0]}>
           <boxGeometry args={[0.95, 0.55, 0.04]} />
           <meshStandardMaterial
-            color={ACCENT}
-            emissive={ACCENT}
+            color={theme.accent}
+            emissive={theme.accent}
             emissiveIntensity={0.25}
             side={THREE.DoubleSide}
           />
@@ -91,64 +69,261 @@ function FinishFlag({ x, onFinish }: { x: number; onFinish: () => void }) {
       {/* Base marker */}
       <mesh position={[0, 0.05, 0]}>
         <cylinderGeometry args={[0.35, 0.42, 0.1, 16]} />
-        <meshStandardMaterial color={BLOCK_COLOR} roughness={0.8} />
+        <meshStandardMaterial color={theme.block} roughness={0.8} />
       </mesh>
     </group>
   );
 }
 
-function BackgroundShapes() {
+/** Kinematic lift oscillating vertically on a sine — the player rides it. */
+function Mover({
+  def,
+  theme,
+}: {
+  def: NonNullable<LevelLayout["movers"]>[number];
+  theme: StageTheme;
+}) {
+  const body = useRef<RapierRigidBody>(null);
+  const time = useRef(0);
+
+  useFrame((_, delta) => {
+    time.current += Math.min(delta, MAX_STEP);
+    const y =
+      def.baseY +
+      def.amp * Math.sin((Math.PI * 2 * time.current) / def.period + (def.phase ?? 0));
+    body.current?.setNextKinematicTranslation({ x: def.cx, y, z: 0 });
+  });
+
+  return (
+    <RigidBody
+      ref={body}
+      type="kinematicPosition"
+      colliders="cuboid"
+      position={[def.cx, def.baseY, 0]}
+    >
+      <mesh>
+        <boxGeometry args={[def.w, 0.4, 2.6]} />
+        <meshStandardMaterial color={theme.block} roughness={0.8} />
+      </mesh>
+      {/* Accent top so the lift reads as "the moving thing" */}
+      <mesh position={[0, 0.215, 0]}>
+        <boxGeometry args={[def.w, 0.05, 2.6]} />
+        <meshStandardMaterial
+          color={theme.accent}
+          emissive={theme.accent}
+          emissiveIntensity={0.35}
+        />
+      </mesh>
+    </RigidBody>
+  );
+}
+
+/** Kinematic sphere patrolling fromX..toX — pushes the player, forces timing. */
+function Roller({
+  def,
+  theme,
+}: {
+  def: NonNullable<LevelLayout["rollers"]>[number];
+  theme: StageTheme;
+}) {
+  const body = useRef<RapierRigidBody>(null);
+  const time = useRef(0);
+  const quat = useMemo(() => new THREE.Quaternion(), []);
+  const euler = useMemo(() => new THREE.Euler(), []);
+  const mid = (def.fromX + def.toX) / 2;
+  const amp = (def.toX - def.fromX) / 2;
+
+  useFrame((_, delta) => {
+    time.current += Math.min(delta, MAX_STEP);
+    const x = mid + amp * Math.sin((Math.PI * 2 * time.current) / def.period);
+    body.current?.setNextKinematicTranslation({ x, y: def.r, z: 0 });
+    // Roll visually in sync with travel.
+    euler.set(0, 0, -(x - def.fromX) / def.r);
+    quat.setFromEuler(euler);
+    body.current?.setNextKinematicRotation(quat);
+  });
+
+  return (
+    <RigidBody
+      ref={body}
+      type="kinematicPosition"
+      colliders={false}
+      position={[mid, def.r, 0]}
+    >
+      <BallCollider args={[def.r]} />
+      <mesh>
+        <sphereGeometry args={[def.r, 24, 24]} />
+        <meshStandardMaterial color={theme.hazard} roughness={0.35} />
+      </mesh>
+      {/* Contrast band makes the roll legible */}
+      <mesh>
+        <torusGeometry args={[def.r * 0.99, 0.06, 8, 32]} />
+        <meshStandardMaterial
+          color={theme.accent}
+          emissive={theme.accent}
+          emissiveIntensity={0.3}
+        />
+      </mesh>
+    </RigidBody>
+  );
+}
+
+/** Contact launches the player upward — required to clear the stage-3 wall. */
+function BouncePad({
+  def,
+  theme,
+}: {
+  def: NonNullable<LevelLayout["pads"]>[number];
+  theme: StageTheme;
+}) {
+  const visual = useRef<THREE.Group>(null);
+  const hitAt = useRef(-1);
+
+  const onHit = useCallback((payload: CollisionEnterPayload) => {
+    const other = payload.other.rigidBody;
+    if (!other) return;
+    const v = other.linvel();
+    other.setLinvel({ x: v.x, y: PAD_LAUNCH_VELOCITY, z: 0 }, true);
+    hitAt.current = 0;
+  }, []);
+
+  // Quick squash on launch — gameplay feedback, driven by the player's action.
+  useFrame((_, delta) => {
+    if (!visual.current || hitAt.current < 0) return;
+    hitAt.current += Math.min(delta, MAX_STEP);
+    const t = hitAt.current;
+    if (t >= 0.3) {
+      visual.current.scale.y = 1;
+      hitAt.current = -1;
+      return;
+    }
+    visual.current.scale.y = 1 - Math.sin((t / 0.3) * Math.PI) * 0.4;
+  });
+
+  return (
+    <RigidBody
+      type="fixed"
+      colliders={false}
+      position={[def.cx, PAD_HEIGHT / 2, 0]}
+      onCollisionEnter={onHit}
+    >
+      <CuboidCollider args={[0.85, PAD_HEIGHT / 2, 1.2]} />
+      <group ref={visual}>
+        <mesh>
+          <cylinderGeometry args={[0.8, 0.92, PAD_HEIGHT, 24]} />
+          <meshStandardMaterial color={theme.block} roughness={0.6} />
+        </mesh>
+        <mesh position={[0, PAD_HEIGHT / 2 - 0.02, 0]}>
+          <torusGeometry args={[0.62, 0.06, 8, 32]} />
+          <meshStandardMaterial
+            color={theme.accent}
+            emissive={theme.accent}
+            emissiveIntensity={0.6}
+          />
+        </mesh>
+      </group>
+    </RigidBody>
+  );
+}
+
+function BackgroundShapes({
+  theme,
+  reduced,
+}: {
+  theme: StageTheme;
+  reduced: boolean;
+}) {
+  const shapes: {
+    pos: [number, number, number];
+    geo: ReactNode;
+    color: string;
+    opacity: number;
+    float: { speed: number; rot: number; lift: number };
+  }[] = [
+    {
+      pos: [8, 3.4, -7],
+      geo: <icosahedronGeometry args={[0.9, 0]} />,
+      color: theme.accent,
+      opacity: 0.18,
+      float: { speed: 1.3, rot: 0.5, lift: 0.8 },
+    },
+    {
+      pos: [19, 4.2, -9],
+      geo: <octahedronGeometry args={[0.8, 0]} />,
+      color: theme.wire,
+      opacity: 0.14,
+      float: { speed: 1.7, rot: 0.4, lift: 0.6 },
+    },
+    {
+      pos: [30, 3, -8],
+      geo: <torusGeometry args={[0.7, 0.18, 10, 36]} />,
+      color: theme.accent,
+      opacity: 0.16,
+      float: { speed: 1.1, rot: 0.3, lift: 0.5 },
+    },
+  ];
+
   return (
     <group>
-      <Float speed={1.3} rotationIntensity={0.5} floatIntensity={0.8}>
-        <mesh position={[8, 3.4, -7]}>
-          <icosahedronGeometry args={[0.9, 0]} />
-          <meshBasicMaterial color={ACCENT} wireframe transparent opacity={0.18} />
-        </mesh>
-      </Float>
-      <Float speed={1.7} rotationIntensity={0.4} floatIntensity={0.6}>
-        <mesh position={[19, 4.2, -9]}>
-          <octahedronGeometry args={[0.8, 0]} />
-          <meshBasicMaterial color="#a8c8ff" wireframe transparent opacity={0.14} />
-        </mesh>
-      </Float>
-      <Float speed={1.1} rotationIntensity={0.3} floatIntensity={0.5}>
-        <mesh position={[30, 3, -8]}>
-          <torusGeometry args={[0.7, 0.18, 10, 36]} />
-          <meshBasicMaterial color={ACCENT} wireframe transparent opacity={0.16} />
-        </mesh>
-      </Float>
+      {shapes.map((s, i) => {
+        const mesh = (
+          <mesh position={s.pos}>
+            {s.geo}
+            <meshBasicMaterial color={s.color} wireframe transparent opacity={s.opacity} />
+          </mesh>
+        );
+        return reduced ? (
+          <group key={i}>{mesh}</group>
+        ) : (
+          <Float
+            key={i}
+            speed={s.float.speed}
+            rotationIntensity={s.float.rot}
+            floatIntensity={s.float.lift}
+          >
+            {mesh}
+          </Float>
+        );
+      })}
     </group>
   );
 }
 
 export function Level({
   layout,
+  theme,
   onFinish,
 }: {
   layout: LevelLayout;
+  theme: StageTheme;
   onFinish: () => void;
 }) {
+  const reduced = usePrefersReducedMotion();
+
   return (
     <group>
-      {/* Ground strips (gap between them is the drop hazard) */}
-      {layout.grounds.map((g, i) => (
-        <RigidBody key={`ground-${i}`} type="fixed" colliders="cuboid">
-          <mesh position={[g.cx, -0.5, 0]}>
-            <boxGeometry args={[g.w, 1, 3]} />
-            <meshStandardMaterial color={GROUND_COLOR} roughness={0.9} />
-          </mesh>
-        </RigidBody>
-      ))}
+      {/* Ground strips (gaps between them are the drop hazards) */}
+      {layout.grounds.map((g, i) => {
+        const top = g.top ?? 0;
+        const h = top + 1; // extend down to y = -1 so plateaus read as solid
+        return (
+          <RigidBody key={`ground-${i}`} type="fixed" colliders="cuboid">
+            <mesh position={[g.cx, top - h / 2, 0]}>
+              <boxGeometry args={[g.w, h, 3]} />
+              <meshStandardMaterial color={theme.ground} roughness={0.9} />
+            </mesh>
+          </RigidBody>
+        );
+      })}
       {/* Accent edge lines along ground tops — decorative only */}
       {layout.grounds.map((g, i) => (
-        <mesh key={`edge-${i}`} position={[g.cx, 0.005, 1.28]}>
+        <mesh key={`edge-${i}`} position={[g.cx, (g.top ?? 0) + 0.005, 1.28]}>
           <boxGeometry args={[g.w, 0.03, 0.05]} />
-          <meshBasicMaterial color={ACCENT} transparent opacity={0.45} />
+          <meshBasicMaterial color={theme.accent} transparent opacity={0.45} />
         </mesh>
       ))}
 
-      {/* Obstacles */}
+      {/* Fixed obstacles + floating ledges */}
       {layout.blocks.map((b, i) => (
         <RigidBody
           key={`block-${i}`}
@@ -159,18 +334,28 @@ export function Level({
         >
           <mesh>
             <boxGeometry args={[b.w, b.h, 2.4]} />
-            <meshStandardMaterial color={BLOCK_COLOR} roughness={0.85} />
+            <meshStandardMaterial color={theme.block} roughness={0.85} />
           </mesh>
           {/* thin accent cap */}
           <mesh position={[0, b.h / 2 + 0.015, 0]}>
             <boxGeometry args={[b.w, 0.03, 2.4]} />
-            <meshBasicMaterial color={ACCENT} transparent opacity={0.35} />
+            <meshBasicMaterial color={theme.accent} transparent opacity={0.35} />
           </mesh>
         </RigidBody>
       ))}
 
-      <FinishFlag x={layout.finishX} onFinish={onFinish} />
-      <BackgroundShapes />
+      {layout.movers?.map((m, i) => (
+        <Mover key={`mover-${i}`} def={m} theme={theme} />
+      ))}
+      {layout.rollers?.map((r, i) => (
+        <Roller key={`roller-${i}`} def={r} theme={theme} />
+      ))}
+      {layout.pads?.map((p, i) => (
+        <BouncePad key={`pad-${i}`} def={p} theme={theme} />
+      ))}
+
+      <FinishFlag x={layout.finishX} theme={theme} reduced={reduced} onFinish={onFinish} />
+      <BackgroundShapes theme={theme} reduced={reduced} />
     </group>
   );
 }

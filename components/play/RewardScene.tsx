@@ -4,14 +4,15 @@ import { useState, type KeyboardEvent } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { bio } from "@/data/bio";
-import type { Answer } from "./questions";
 
 const easeOut = [0.22, 1, 0.36, 1] as const;
 
 // Design tokens via CSS vars — applied through style props, since SVG
 // presentation attributes can't resolve var() but style-based paints can.
-const ACCENT = "var(--color-accent)";
-const ACCENT_SOFT = "var(--color-accent-soft)";
+// The stage accent is set by PlayExperience, so the box wears the
+// stage-3 palette at the finale.
+const ACCENT = "var(--stage-accent, var(--color-accent))";
+const ACCENT_SOFT = "var(--stage-accent-soft, var(--color-accent-soft))";
 const SURFACE = "var(--color-bg-elevated)";
 const MUTED = "var(--color-fg-muted)";
 
@@ -153,9 +154,10 @@ function CatWithBox({
         </g>
       </motion.g>
 
-      {/* Mystery box — three knocks to open */}
+      {/* Mystery box — three knocks to open. The focusable group stays
+          mounted across knocks (keyboard focus survives); only the inner
+          group remounts, via key={clicks}, to re-trigger the shake. */}
       <motion.g
-        key={clicks}
         role="button"
         tabIndex={opened ? -1 : 0}
         aria-label={
@@ -165,6 +167,10 @@ function CatWithBox({
         onClick={opened ? undefined : onBoxClick}
         onKeyDown={opened ? undefined : boxKeyDown}
         whileTap={opened ? undefined : { scale: 0.96 }}
+        style={{ originX: 0.5, originY: 0.5 }}
+      >
+      <motion.g
+        key={clicks}
         animate={shake ? { x: shake.x, rotate: shake.rotate } : undefined}
         transition={{ duration: 0.5 }}
         style={{ originX: 0.5, originY: 0.5 }}
@@ -246,6 +252,7 @@ function CatWithBox({
           <rect x="114" y="192" width="12" height="16" opacity="0.85" style={{ fill: ACCENT }} />
         </motion.g>
       </motion.g>
+      </motion.g>
 
       {/* Paws resting on the lid */}
       <motion.g
@@ -286,12 +293,12 @@ function CatWithBox({
 }
 
 type RewardSceneProps = {
-  answer: Answer;
-  round: number;
-  onNextRound: () => void;
+  /** The synthesized qualified-brief statement built from all three answers. */
+  message: string;
+  onPlayAgain: () => void;
 };
 
-export function RewardScene({ answer, round, onNextRound }: RewardSceneProps) {
+export function RewardScene({ message, onPlayAgain }: RewardSceneProps) {
   const [clicks, setClicks] = useState(0);
   const opened = clicks >= 3;
   const reduced = useReducedMotion() ?? false;
@@ -311,7 +318,7 @@ export function RewardScene({ answer, round, onNextRound }: RewardSceneProps) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: easeOut }}
       >
-        The reward
+        Three stages down — the reward
       </motion.p>
 
       <motion.div
@@ -344,7 +351,7 @@ export function RewardScene({ answer, round, onNextRound }: RewardSceneProps) {
                   key={i}
                   className={
                     i < clicks
-                      ? "h-1.5 w-1.5 rounded-full bg-[--color-accent]"
+                      ? "h-1.5 w-1.5 rounded-full bg-[--stage-accent]"
                       : "h-1.5 w-1.5 rounded-full bg-[--color-border]"
                   }
                 />
@@ -360,36 +367,36 @@ export function RewardScene({ answer, round, onNextRound }: RewardSceneProps) {
             transition={{ delay: reduced ? 0 : 0.35, duration: 0.8, ease: easeOut }}
           >
             <p className="text-balance font-display text-3xl italic leading-snug tracking-tight md:text-5xl">
-              {answer.message}
+              {message}
             </p>
 
             <p className="mt-8 text-xs uppercase tracking-[0.25em] text-[--color-fg-muted]">
-              The real reward is one email away
+              The real reward is one conversation away
             </p>
             <a
               href={`mailto:${bio.contact.email}`}
               data-cursor="hover"
-              className="mt-4 rounded-full border border-[--color-accent] bg-[--color-accent]/10 px-8 py-3 text-sm font-medium uppercase tracking-[0.2em] text-[--color-accent] transition-colors hover:bg-[--color-accent]/20"
+              className="mt-4 rounded-full border border-[--stage-accent] bg-[--stage-accent]/10 px-8 py-3 text-sm font-medium uppercase tracking-[0.2em] text-[--stage-accent] transition-colors hover:bg-[--stage-accent]/20"
             >
-              {bio.contact.email}
+              Talk to Jawad
             </a>
 
             <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-              <button
-                type="button"
-                onClick={onNextRound}
-                data-cursor="hover"
-                className="rounded-full border border-[--color-border] px-6 py-2.5 text-xs uppercase tracking-[0.2em] text-[--color-fg] transition-colors hover:border-[--color-accent] hover:text-[--color-accent]"
-              >
-                {round === 1 ? "Next round" : "One more run"}
-              </button>
               <Link
                 href="/"
                 data-cursor="hover"
-                className="rounded-full border border-[--color-border] px-6 py-2.5 text-xs uppercase tracking-[0.2em] text-[--color-fg-muted] transition-colors hover:border-[--color-accent] hover:text-[--color-accent]"
+                className="rounded-full border border-[--color-border] px-6 py-2.5 text-xs uppercase tracking-[0.2em] text-[--color-fg-muted] transition-colors hover:border-[--stage-accent] hover:text-[--stage-accent]"
               >
                 Go to home
               </Link>
+              <button
+                type="button"
+                onClick={onPlayAgain}
+                data-cursor="hover"
+                className="rounded-full border border-[--color-border] px-6 py-2.5 text-xs uppercase tracking-[0.2em] text-[--color-fg-muted] transition-colors hover:border-[--stage-accent] hover:text-[--stage-accent]"
+              >
+                Play again
+              </button>
             </div>
           </motion.div>
         )}

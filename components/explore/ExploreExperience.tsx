@@ -1,18 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { useLenis } from "@/lib/lenis";
 import ScrollScene from "./ScrollSceneClient";
 import { Section } from "./Section";
 import { skillCategories } from "@/data/skills";
 import { featuredProjects } from "@/data/projects";
 import { JourneyFooter } from "@/components/footer/JourneyFooter";
+import { yearsWord } from "@/lib/experience";
+import { useExperienceYears } from "@/lib/experience-client";
 
 const easeOut = [0.22, 1, 0.36, 1] as const;
 
 export function ExploreExperience() {
   useLenis();
+  const years = useExperienceYears();
+  const reduce = useReducedMotion() ?? false;
 
   return (
     <main className="relative">
@@ -42,7 +46,7 @@ export function ExploreExperience() {
           scroll
           <motion.span
             className="mt-3 block h-10 w-px bg-[--color-fg-muted]"
-            animate={{ scaleY: [0.4, 1, 0.4] }}
+            animate={reduce ? undefined : { scaleY: [0.4, 1, 0.4] }}
             transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
             style={{ transformOrigin: "top" }}
           />
@@ -50,7 +54,10 @@ export function ExploreExperience() {
       </Section>
 
       {/* Section 2 — Bio */}
-      <Section label="01 — Who" title="Lahore. Five years deep. Lead-tier scope.">
+      <Section
+        label="01 — Who"
+        title={`Lahore. ${yearsWord(years)} years deep. Lead-tier scope.`}
+      >
         <p className="mx-auto max-w-2xl text-balance text-lg leading-relaxed text-[--color-fg-muted]">
           I&apos;ve been shipping production systems since 2021 — billing flows that
           move money across borders, AI agents that hold conversations, data pipelines

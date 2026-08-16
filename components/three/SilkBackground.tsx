@@ -4,7 +4,7 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { cn } from "@/lib/utils";
-import { Floaters } from "./Background";
+import { canvasDpr, useCoarsePointer, usePrefersReducedMotion } from "@/lib/motion";
 
 export type SilkVariant = "calm" | "deep" | "energetic";
 
@@ -15,12 +15,18 @@ type SilkPreset = {
   intensity: number;
   /** Band sharpness — higher = more defined silk folds. */
   contrast: number;
+  /**
+   * fbm octaves. Every octave is a simplex evaluation in five separate fbm
+   * calls, so this is the single biggest lever on fragment cost. Only the
+   * full-screen-hero variant pays for the fourth.
+   */
+  octaves: number;
 };
 
 const PRESETS: Record<SilkVariant, SilkPreset> = {
-  calm: { speed: 0.032, intensity: 0.55, contrast: 1.2 },
-  deep: { speed: 0.026, intensity: 0.72, contrast: 1.5 },
-  energetic: { speed: 0.05, intensity: 0.9, contrast: 1.75 },
+  calm: { speed: 0.032, intensity: 0.55, contrast: 1.2, octaves: 3 },
+  deep: { speed: 0.026, intensity: 0.72, contrast: 1.5, octaves: 3 },
+  energetic: { speed: 0.05, intensity: 0.9, contrast: 1.75, octaves: 4 },
 };
 
 // Raw sRGB components — bypasses THREE.Color's sRGB→linear conversion so the
@@ -46,7 +52,7 @@ void main() {
 }
 `;
 
-const fragmentShader = /* glsl */ `
+const fragmentShaderBody = /* glsl */ `
 precision highp float;
 
 uniform float uTime;
@@ -91,7 +97,7 @@ float fbm(vec2 p) {
   float v = 0.0;
   float a = 0.5;
   mat2 rot = mat2(0.8, 0.6, -0.6, 0.8);
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < OCTAVES; i++) {
     v += a * snoise(p);
     p = rot * p * 2.03 + vec2(7.3, 3.1);
     a *= 0.52;
@@ -120,8 +126,9 @@ void main() {
   float gold = smoothstep(0.32, 0.92, lum + dot(q, q) * 0.22);
   gold = pow(gold, uContrast);
 
-  // Cool counter-current — independent slower flow moving the other way.
-  float c = fbm(p * 0.85 - vec2(0.35, 0.5) * t + vec2(3.7, 1.2) + r * 0.5);
+  // Cool counter-current — recombines the second warp field instead of
+  // evaluating a sixth fbm; the signed mix decorrelates it from the gold.
+  float c = dot(r, vec2(0.62, -0.48));
   float blue = pow(smoothstep(0.42, 0.95, c * 0.5 + 0.5), uContrast * 1.1);
 
   vec3 col = uBase;
@@ -144,18 +151,9 @@ void main() {
 }
 `;
 
-/** Live `prefers-reduced-motion` flag — shared by the WebGL scenes. */
-export function usePrefersReducedMotion() {
-  const [reduced, setReduced] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReduced(mq.matches);
-    const onChange = (e: MediaQueryListEvent) => setReduced(e.matches);
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
-  }, []);
-  return reduced;
-}
+/** GLSL ES 1.0 needs a constant loop bound — the octave count is a #define. */
+const fragmentShaderFor = (octaves: number) =>
+  `#define OCTAVES ${octaves}\n${fragmentShaderBody}`;
 
 /**
  * Fullscreen silk shader quad — drop inside ANY existing R3F Canvas.
@@ -171,7 +169,7 @@ export function SilkPlane({ variant = "calm" }: { variant?: SilkVariant }) {
     const preset = PRESETS[variant];
     return new THREE.ShaderMaterial({
       vertexShader,
-      fragmentShader,
+      fragmentShader: fragmentShaderFor(preset.octaves),
       depthTest: false,
       depthWrite: false,
       uniforms: {
@@ -213,8 +211,6 @@ export function SilkPlane({ variant = "calm" }: { variant?: SilkVariant }) {
 type SilkBackgroundProps = {
   variant?: SilkVariant;
   className?: string;
-  /** Layer the landing wireframe floaters into the same Canvas for depth. */
-  floaters?: boolean;
 };
 
 /**
@@ -224,26 +220,56 @@ type SilkBackgroundProps = {
 export function SilkBackground({
   variant = "calm",
   className,
-  floaters = false,
 }: SilkBackgroundProps) {
+  const wrapper = useRef<HTMLDivElement>(null);
+  const coarse = useCoarsePointer();
+  const [visible, setVisible] = useState(true);
+  const [contextLost, setContextLost] = useState(false);
+
+  // The deck sits above a full-height footer. Once it scrolls away there is
+  // no reason to keep shading a fragment-heavy full-screen quad; SilkPlane
+  // accumulates its own clock, so resuming is seamless.
+  useEffect(() => {
+    const el = wrapper.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(
+      ([entry]) => setVisible(entry.isIntersecting),
+      { threshold: 0 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  // Decorative surface: a lost context drops it rather than leaving a
+  // permanently black rectangle over the page background.
+  if (contextLost) return null;
+
   return (
     <div
+      ref={wrapper}
       aria-hidden
       className={cn("pointer-events-none absolute inset-0 -z-20", className)}
     >
       <Canvas
         camera={{ position: [0, 0, 5], fov: 55 }}
-        dpr={[1, 1.75]}
+        dpr={canvasDpr(coarse)}
+        frameloop={visible ? "always" : "never"}
         gl={{
-          // The quad needs no AA; wireframe floaters do.
-          antialias: floaters,
+          // The quad needs no AA — it is a single full-screen triangle pair.
+          antialias: false,
           alpha: false,
           powerPreference: "high-performance",
+        }}
+        onCreated={({ gl }) => {
+          gl.domElement.addEventListener(
+            "webglcontextlost",
+            () => setContextLost(true),
+            { once: true },
+          );
         }}
       >
         <Suspense fallback={null}>
           <SilkPlane variant={variant} />
-          {floaters && <Floaters />}
         </Suspense>
       </Canvas>
     </div>

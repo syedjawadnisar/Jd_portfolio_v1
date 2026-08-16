@@ -4,6 +4,14 @@ import { useEffect, useState } from "react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
 
 /**
+ * Overlay tiers, highest last:
+ *   z-[100] — full-screen curtains (IntroOverlay)
+ *   z-[200] — the cursor, which must never be painted over while the
+ *             native one is hidden.
+ */
+const CURSOR_LAYER = "z-[200]";
+
+/**
  * Bespoke cursor — dot (precise pointer) + ring (spring-tracked).
  * Ring grows + softens on hoverable targets ([data-cursor="hover"]).
  * Native cursor is hidden on fine pointers via globals.css.
@@ -90,7 +98,7 @@ export function Cursor() {
       {/* Outer ring — spring-tracked, lags slightly */}
       <motion.div
         aria-hidden
-        className="pointer-events-none fixed left-0 top-0 z-[100] mix-blend-screen"
+        className={`pointer-events-none fixed left-0 top-0 ${CURSOR_LAYER} mix-blend-screen`}
         style={{ x: ringX, y: ringY }}
       >
         <motion.div
@@ -109,7 +117,7 @@ export function Cursor() {
       {/* Inner dot — exact mouse position, no lag */}
       <motion.div
         aria-hidden
-        className="pointer-events-none fixed left-0 top-0 z-[100] h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[--color-accent] mix-blend-screen"
+        className={`pointer-events-none fixed left-0 top-0 ${CURSOR_LAYER} h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[--color-accent] mix-blend-screen`}
         style={{ x: mouseX, y: mouseY }}
         animate={{ scale: dotScale }}
         transition={{ type: "spring", damping: 24, stiffness: 380 }}

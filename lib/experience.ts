@@ -22,11 +22,6 @@ export function yearsOfExperience(now: Date = new Date()): number {
   return Math.max(0, years);
 }
 
-/** e.g. "5+ years" — floor plus a "+". */
-export function experienceLabel(now?: Date): string {
-  return `${yearsOfExperience(now)}+ years`;
-}
-
 const NUMBER_WORDS = [
   "Zero",
   "One",
@@ -43,12 +38,10 @@ const NUMBER_WORDS = [
   "Twelve",
 ] as const;
 
-/** Capitalized word for a small count ("Five"); digits beyond twelve. */
-export function yearsWord(years: number): string {
-  return NUMBER_WORDS[years] ?? String(years);
-}
-
-/** e.g. "Five" — word form of the current floor, for prose copy. */
-export function experienceYearsWord(now?: Date): string {
-  return yearsWord(yearsOfExperience(now));
+/**
+ * Capitalized word for a small count ("Five"); digits beyond twelve.
+ * The one number-word table on the site — years, project counts, anything.
+ */
+export function numberWord(count: number): string {
+  return NUMBER_WORDS[count] ?? String(count);
 }

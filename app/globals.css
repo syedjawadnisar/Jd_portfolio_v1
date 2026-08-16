@@ -41,8 +41,37 @@
     }
   }
 
+  /* Keyboard focus must stay visible everywhere — the native cursor is
+     hidden on fine pointers, so the ring is the only pointer feedback. */
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
   ::selection {
     background: var(--color-accent);
     color: var(--color-bg);
   }
+}
+
+/* Intro curtain — JS-free escape hatch.
+   The overlay ships opaque in the prerendered HTML so the reveal is not a
+   flash of unstyled hero. This keyframe lifts it on its own if the mount
+   effect never runs (JS disabled, hydration failure). The class is dropped
+   the moment React takes over, so it never fights the framer-motion exit. */
+@keyframes intro-curtain-lift {
+  0%,
+  70% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-100%);
+    visibility: hidden;
+  }
+}
+
+.intro-curtain-fallback {
+  animation: intro-curtain-lift 2.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }

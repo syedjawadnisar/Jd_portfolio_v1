@@ -50,7 +50,8 @@ const MOTTO_SERIF_FROM = 4;
 const mottoWords = bio.motto.split(" ");
 
 /* ------------------------------------------------------------------ */
-/* The deck — 7 slides, ~47 seconds total. Pacing is intentional:      */
+/* The deck — 7 slides, 50 seconds total (the number the landing and the  */
+/* route title both promise). Pacing is intentional:                     */
 /* short hook, longest hold on the three-project chapter.              */
 /* ------------------------------------------------------------------ */
 
@@ -62,7 +63,7 @@ export const slides: readonly Slide[] = [
       { text: mottoWords.slice(0, MOTTO_SERIF_FROM).join(" ") },
       { text: mottoWords.slice(MOTTO_SERIF_FROM).join(" "), serif: true },
     ],
-    durationMs: 6000,
+    durationMs: 6500,
   },
   {
     id: "who",
@@ -72,7 +73,7 @@ export const slides: readonly Slide[] = [
       { text: "Lead-tier scope.", serif: true },
     ],
     body: "Shipping production systems since 2021 — billing flows that move money across borders, AI agents that hold conversations, pipelines that don't flinch under load. The years aren't the story. The output is.",
-    durationMs: 7000,
+    durationMs: 7500,
   },
   {
     id: "arsenal",
@@ -84,7 +85,7 @@ export const slides: readonly Slide[] = [
       { title: "Cloud & DevOps", detail: pickSkills("Cloud & DevOps", 3) },
       { title: "Architecture", detail: pickSkills("Architecture", 3) },
     ],
-    durationMs: 7000,
+    durationMs: 7500,
   },
   {
     id: "superpower",
@@ -94,14 +95,14 @@ export const slides: readonly Slide[] = [
       { text: "knows itself.", serif: true },
     ],
     body: "Error-handling that diagnoses itself. Pipelines that route around their own failures. Agents that turn fuzzy intent into reliable side effects. AI isn't a feature I bolt on — it's how my systems think.",
-    durationMs: 7000,
+    durationMs: 7500,
   },
   {
     id: "rhythm",
     kicker: "04 — Operating rhythm",
     heading: [{ text: "Rhythm" }, { text: "over ritual.", serif: true }],
     body: "Jira, Asana, Zendesk, GitHub Actions — pick the cadence, I'll run it. Sprints that move. Retros that change behavior. Dashboards that tell the truth.",
-    durationMs: 5500,
+    durationMs: 6000,
   },
   {
     id: "work",
@@ -112,7 +113,7 @@ export const slides: readonly Slide[] = [
       detail: p.impact,
       meta: p.domain,
     })),
-    durationMs: 8000,
+    durationMs: 8500,
   },
   {
     id: "cta",

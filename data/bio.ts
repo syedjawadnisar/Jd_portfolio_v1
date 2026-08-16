@@ -3,7 +3,9 @@ export const bio = {
   title: "Senior Full-Stack & AI Architect",
   location: "Lahore, Pakistan",
 
-  // DRAFT punchline — easy to swap. Tell me which direction you prefer.
+  // Split into sans + italic display serif at a fixed word index: Hero.tsx
+  // (SERIF_FROM) and data/slides.ts (MOTTO_SERIF_FROM) both slice at 4, so
+  // an edit that changes the word count needs both indices revisited.
   motto: "I architect the systems other teams talk about.",
   subline:
     "Lead-tier engineering for the platforms that move money, manage people, and ship at global scale.",
@@ -22,13 +24,6 @@ export const paths = [
     label: "Cinematic Auto-Play",
     description: "Hands-free. Highlights only. The fastest path to “let’s talk.”",
     duration: "~50s",
-  },
-  {
-    href: "/explore",
-    title: "I want to explore",
-    label: "The Architect's Scroll",
-    description: "Scroll-controlled. Particles and 3D follow your pace.",
-    duration: "self-paced",
   },
   {
     href: "/play",

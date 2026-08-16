@@ -3,12 +3,11 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { paths } from "@/data/bio";
-
-const easeOut = [0.22, 1, 0.36, 1] as const;
+import { EASE_OUT } from "@/lib/motion";
 
 export function PathChooser() {
   return (
-    <div className="grid w-full max-w-5xl grid-cols-1 gap-4 md:grid-cols-3">
+    <div className="grid w-full max-w-4xl grid-cols-1 gap-3 sm:gap-5 md:grid-cols-2 md:gap-6">
       {paths.map((path, idx) => (
         <motion.div
           key={path.href}
@@ -17,14 +16,14 @@ export function PathChooser() {
           transition={{
             delay: 0.4 + idx * 0.12,
             duration: 0.7,
-            ease: easeOut,
+            ease: EASE_OUT,
           }}
-          whileHover={{ y: -4, transition: { type: "spring", stiffness: 300, damping: 22 } }}
+          whileHover={{ y: -6, transition: { type: "spring", stiffness: 300, damping: 22 } }}
         >
           <Link
             href={path.href}
             data-cursor="hover"
-            className="group relative block h-full overflow-hidden rounded-2xl border border-[--color-border] bg-[--color-bg-elevated]/60 p-6 backdrop-blur-sm transition-colors duration-300 hover:border-[--color-accent]"
+            className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-[--color-border] bg-[--color-bg-elevated]/60 p-5 backdrop-blur-sm transition-colors duration-300 hover:border-[--color-accent] sm:rounded-3xl sm:p-8 md:p-10"
           >
             {/* Hover shimmer */}
             <span
@@ -37,15 +36,21 @@ export function PathChooser() {
               <span>{path.duration}</span>
             </div>
 
-            <h3 className="relative mt-5 text-2xl font-semibold tracking-tight text-[--color-fg]">
+            <h2 className="relative mt-3 flex items-center justify-between gap-4 text-xl font-semibold leading-tight tracking-tight text-[--color-fg] sm:mt-6 sm:block sm:text-3xl md:text-4xl">
               {path.title}
-            </h3>
+              <span
+                aria-hidden
+                className="text-lg text-[--color-accent] transition-transform duration-300 group-hover:translate-x-1.5 sm:hidden"
+              >
+                →
+              </span>
+            </h2>
 
-            <p className="relative mt-3 text-sm leading-relaxed text-[--color-fg-muted]">
+            <p className="relative mt-2 text-sm leading-relaxed text-[--color-fg-muted] sm:mt-4 sm:text-base">
               {path.description}
             </p>
 
-            <div className="relative mt-7 flex items-center gap-2 text-sm font-medium text-[--color-accent] opacity-80 transition-opacity group-hover:opacity-100">
+            <div className="relative mt-auto hidden items-center gap-2 pt-8 text-sm font-medium uppercase tracking-[0.2em] text-[--color-accent] opacity-80 transition-opacity group-hover:opacity-100 sm:flex">
               Enter
               <span
                 aria-hidden

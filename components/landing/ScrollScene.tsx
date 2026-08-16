@@ -2,13 +2,11 @@
 
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Float } from "@react-three/drei";
-import { Suspense, useMemo, useRef } from "react";
+import { Suspense, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { getScrollProgress } from "@/lib/lenis";
-import {
-  SilkPlane,
-  usePrefersReducedMotion,
-} from "@/components/three/SilkBackground";
+import { canvasDpr, useCoarsePointer, usePrefersReducedMotion } from "@/lib/motion";
+import { SilkPlane } from "@/components/three/SilkBackground";
 
 // 3000 keeps the combined silk + particles scene at 60fps.
 function ParticleSphere({ count = 3000 }: { count?: number }) {
@@ -125,15 +123,31 @@ function CameraDolly() {
 }
 
 export function ScrollScene() {
+  const coarse = useCoarsePointer();
+  const [contextLost, setContextLost] = useState(false);
+
+  // Decorative surface: a lost context drops it rather than leaving a
+  // permanently black rectangle behind the page.
+  if (contextLost) return null;
+
   return (
     <div className="pointer-events-none fixed inset-0 -z-10">
       <Canvas
         camera={{ position: [0, 0, 7], fov: 55 }}
-        dpr={[1, 1.75]}
+        dpr={canvasDpr(coarse)}
         gl={{
           antialias: true,
-          alpha: true,
+          // SilkPlane writes alpha 1.0 to every pixel, so an alpha buffer
+          // would only cost the compositor a blend pass for nothing.
+          alpha: false,
           powerPreference: "high-performance",
+        }}
+        onCreated={({ gl }) => {
+          gl.domElement.addEventListener(
+            "webglcontextlost",
+            () => setContextLost(true),
+            { once: true },
+          );
         }}
       >
         <Suspense fallback={null}>

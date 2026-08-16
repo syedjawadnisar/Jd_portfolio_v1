@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, type KeyboardEvent } from "react";
-import Link from "next/link";
+import { useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { bio } from "@/data/bio";
-
-const easeOut = [0.22, 1, 0.36, 1] as const;
+import { EASE_OUT } from "@/lib/motion";
+import { BackLink } from "@/components/ui/BackLink";
 
 // Design tokens via CSS vars — applied through style props, since SVG
 // presentation attributes can't resolve var() but style-based paints can.
@@ -32,22 +31,26 @@ function CatWithBox({
   reduced: boolean;
   onBoxClick: () => void;
 }) {
-  const boxKeyDown = (e: KeyboardEvent<SVGGElement>) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      onBoxClick();
-    }
-  };
-
   const shake = !reduced && clicks > 0 && !opened ? SHAKE[clicks] : undefined;
 
   return (
-    <svg
-      viewBox="0 0 240 290"
-      role="img"
-      aria-label="A happy cat presenting a mystery box"
-      className="w-[min(72vw,300px)]"
+    // The knock target is a real <button>: an <svg role="img"> would prune
+    // every interactive descendant out of the accessibility tree, so the
+    // drawing is purely decorative and the button carries the state label.
+    <motion.button
+      type="button"
+      onClick={onBoxClick}
+      disabled={opened}
+      data-cursor="hover"
+      aria-label={
+        opened
+          ? "Mystery box opened"
+          : `Mystery box — ${3 - clicks} knocks to open`
+      }
+      whileTap={opened || reduced ? undefined : { scale: 0.96 }}
+      className="block rounded-3xl disabled:cursor-default"
     >
+    <svg viewBox="0 0 240 290" aria-hidden className="w-[min(72vw,300px)]">
       {/* Cat — gentle idle bounce; a single hop when the box opens */}
       <motion.g
         animate={
@@ -61,7 +64,7 @@ function CatWithBox({
         }
         transition={
           opened
-            ? { duration: 0.6, ease: easeOut }
+            ? { duration: 0.6, ease: EASE_OUT }
             : { duration: 2.8, repeat: Infinity, ease: "easeInOut" }
         }
       >
@@ -154,21 +157,8 @@ function CatWithBox({
         </g>
       </motion.g>
 
-      {/* Mystery box — three knocks to open. The focusable group stays
-          mounted across knocks (keyboard focus survives); only the inner
-          group remounts, via key={clicks}, to re-trigger the shake. */}
-      <motion.g
-        role="button"
-        tabIndex={opened ? -1 : 0}
-        aria-label={
-          opened ? "Opened mystery box" : `Mystery box — ${3 - clicks} knocks to open`
-        }
-        data-cursor="hover"
-        onClick={opened ? undefined : onBoxClick}
-        onKeyDown={opened ? undefined : boxKeyDown}
-        whileTap={opened ? undefined : { scale: 0.96 }}
-        style={{ originX: 0.5, originY: 0.5 }}
-      >
+      {/* Mystery box — three knocks to open. The group remounts, via
+          key={clicks}, to re-trigger the shake on each knock. */}
       <motion.g
         key={clicks}
         animate={shake ? { x: shake.x, rotate: shake.rotate } : undefined}
@@ -238,7 +228,7 @@ function CatWithBox({
                 : { y: -74, x: 30, rotate: 26, opacity: 0 }
               : undefined
           }
-          transition={{ duration: 0.7, ease: easeOut }}
+          transition={{ duration: 0.7, ease: EASE_OUT }}
         >
           <rect
             x="74"
@@ -252,12 +242,11 @@ function CatWithBox({
           <rect x="114" y="192" width="12" height="16" opacity="0.85" style={{ fill: ACCENT }} />
         </motion.g>
       </motion.g>
-      </motion.g>
 
       {/* Paws resting on the lid */}
       <motion.g
         animate={opened && !reduced ? { y: -10 } : undefined}
-        transition={{ duration: 0.5, ease: easeOut }}
+        transition={{ duration: 0.5, ease: EASE_OUT }}
       >
         <ellipse cx="100" cy="194" rx="9" ry="7" strokeWidth="2.5" style={{ fill: SURFACE, stroke: ACCENT }} />
         <ellipse cx="140" cy="194" rx="9" ry="7" strokeWidth="2.5" style={{ fill: SURFACE, stroke: ACCENT }} />
@@ -289,6 +278,7 @@ function CatWithBox({
         </motion.g>
       )}
     </svg>
+    </motion.button>
   );
 }
 
@@ -311,20 +301,25 @@ export function RewardScene({ message, onPlayAgain }: RewardSceneProps) {
         : "One more.";
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-6 py-24 text-center">
+    <div className="flex min-h-[100svh] flex-col items-center justify-center px-6 py-24 text-center">
       <motion.p
         className="mb-8 text-xs uppercase tracking-[0.3em] text-[--color-fg-muted]"
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: easeOut }}
+        transition={{ duration: 0.6, ease: EASE_OUT }}
       >
         Three stages down — the reward
       </motion.p>
 
+      {/* The knock dots and the reward line are visual — this speaks them. */}
+      <p aria-live="polite" className="sr-only">
+        {opened ? `The box is open. ${message}` : `${clicks} of 3 knocks`}
+      </p>
+
       <motion.div
         initial={{ opacity: 0, scale: 0.92 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.15, duration: 0.8, ease: easeOut }}
+        transition={{ delay: 0.15, duration: 0.8, ease: EASE_OUT }}
       >
         <CatWithBox
           clicks={clicks}
@@ -364,11 +359,11 @@ export function RewardScene({ message, onPlayAgain }: RewardSceneProps) {
             className="mt-10 flex max-w-2xl flex-col items-center"
             initial={{ opacity: 0, y: reduced ? 0 : 28 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: reduced ? 0 : 0.35, duration: 0.8, ease: easeOut }}
+            transition={{ delay: reduced ? 0 : 0.35, duration: 0.8, ease: EASE_OUT }}
           >
-            <p className="text-balance font-display text-3xl italic leading-snug tracking-tight md:text-5xl">
+            <h1 className="text-balance font-display text-3xl italic leading-snug tracking-tight md:text-5xl">
               {message}
-            </p>
+            </h1>
 
             <p className="mt-8 text-xs uppercase tracking-[0.25em] text-[--color-fg-muted]">
               The real reward is one conversation away
@@ -381,14 +376,8 @@ export function RewardScene({ message, onPlayAgain }: RewardSceneProps) {
               Talk to Jawad
             </a>
 
-            <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-              <Link
-                href="/"
-                data-cursor="hover"
-                className="rounded-full border border-[--color-border] px-6 py-2.5 text-xs uppercase tracking-[0.2em] text-[--color-fg-muted] transition-colors hover:border-[--stage-accent] hover:text-[--stage-accent]"
-              >
-                Go to home
-              </Link>
+            <div className="mt-10 flex flex-wrap items-center justify-center gap-6">
+              <BackLink stageAccent />
               <button
                 type="button"
                 onClick={onPlayAgain}

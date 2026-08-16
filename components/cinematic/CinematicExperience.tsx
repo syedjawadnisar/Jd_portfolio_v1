@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   AnimatePresence,
@@ -11,17 +10,21 @@ import {
 } from "framer-motion";
 import { slides } from "@/data/slides";
 import SilkBackgroundClient from "@/components/three/SilkBackgroundClient";
+import { BackLink } from "@/components/ui/BackLink";
 import { ChapterView } from "./ChapterView";
 
 const LAST_INDEX = slides.length - 1;
 
 /**
  * Pace guard only — the deck in data/slides.ts is paced deliberately
- * (~47s total, every chapter well under this cap), so the clamp normally
+ * (~50s total, every chapter well under this cap), so the clamp normally
  * never fires. It exists to stop a future copy edit from letting one
  * chapter overstay.
  */
 const MAX_CHAPTER_MS = 12000;
+
+/** Frame deltas above this are a stall (background tab, long GC) — not time watched. */
+const MAX_FRAME_DELTA_MS = 100;
 
 const CHAPTER_MS: readonly number[] = slides.map((s) =>
   Math.min(s.durationMs, MAX_CHAPTER_MS),
@@ -47,7 +50,11 @@ export function CinematicExperience() {
 
   const [index, setIndex] = useState(0);
   const [userPaused, setUserPaused] = useState(false);
-  const [docHidden, setDocHidden] = useState(false);
+  // Seeded from document.hidden so a deck opened in a background tab never
+  // starts its clock; otherwise the first visible frame swallows a chapter.
+  const [docHidden, setDocHidden] = useState(
+    () => typeof document !== "undefined" && document.hidden,
+  );
   const [finished, setFinished] = useState(false);
   const [remainingSec, setRemainingSec] = useState(
     Math.ceil(TOTAL_MS / 1000),
@@ -77,7 +84,7 @@ export function CinematicExperience() {
     let last = performance.now();
 
     const tick = (now: number) => {
-      const delta = now - last;
+      const delta = Math.min(now - last, MAX_FRAME_DELTA_MS);
       last = now;
 
       const duration = CHAPTER_MS[index];
@@ -106,22 +113,25 @@ export function CinematicExperience() {
   /* ----------------------------------------------------------------
    * Navigation
    * ---------------------------------------------------------------- */
-  function goTo(target: number) {
-    if (target > LAST_INDEX) {
-      // Skipping forward past the CTA completes the run.
-      elapsedRef.current = CHAPTER_MS[LAST_INDEX];
-      segmentProgress.set(1);
-      setFinished(true);
-      syncRemaining(LAST_INDEX, CHAPTER_MS[LAST_INDEX]);
-      return;
-    }
-    const next = Math.max(0, target);
-    elapsedRef.current = 0;
-    segmentProgress.set(0);
-    setFinished(false);
-    setIndex(next);
-    syncRemaining(next, 0);
-  }
+  const goTo = useCallback(
+    (target: number) => {
+      if (target > LAST_INDEX) {
+        // Skipping forward past the CTA completes the run.
+        elapsedRef.current = CHAPTER_MS[LAST_INDEX];
+        segmentProgress.set(1);
+        setFinished(true);
+        syncRemaining(LAST_INDEX, CHAPTER_MS[LAST_INDEX]);
+        return;
+      }
+      const next = Math.max(0, target);
+      elapsedRef.current = 0;
+      segmentProgress.set(0);
+      setFinished(false);
+      setIndex(next);
+      syncRemaining(next, 0);
+    },
+    [segmentProgress, syncRemaining],
+  );
 
   /* ----------------------------------------------------------------
    * Pause when the tab is hidden
@@ -148,15 +158,27 @@ export function CinematicExperience() {
 
   /* ----------------------------------------------------------------
    * Keyboard — arrows skip, space toggles, esc exits.
-   * Re-subscribed each render so handlers always see fresh state.
+   * Bound once; live state is read through refs so the deck does not
+   * re-subscribe on every countdown tick.
    * ---------------------------------------------------------------- */
+  const indexRef = useRef(index);
+  indexRef.current = index;
+  const finishedRef = useRef(finished);
+  finishedRef.current = finished;
+  const goToRef = useRef(goTo);
+  goToRef.current = goTo;
+
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.altKey || e.ctrlKey || e.metaKey) return;
+      // Once the deck is done the visitor has scrolled into the footer game.
+      // Nothing below may hijack their arrows, space bar, or escape key.
+      if (finishedRef.current) return;
+
       if (e.key === "ArrowRight") {
-        goTo(index + 1);
+        goToRef.current(indexRef.current + 1);
       } else if (e.key === "ArrowLeft") {
-        goTo(index - 1);
+        goToRef.current(indexRef.current - 1);
       } else if (e.key === "Escape") {
         router.push("/");
       } else if (e.key === " ") {
@@ -170,7 +192,7 @@ export function CinematicExperience() {
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  });
+  }, [router]);
 
   const slide = slides[index];
 
@@ -197,16 +219,10 @@ export function CinematicExperience() {
       />
 
       {/* Exit affordances */}
-      <Link
-        href="/"
-        data-cursor="hover"
-        className="fixed left-6 top-6 z-50 text-[10px] uppercase tracking-[0.3em] text-[--color-fg-muted]/70 transition-colors hover:text-[--color-accent]"
-      >
-        ← home
-      </Link>
+      <BackLink className="fixed left-6 top-6 z-50" />
       <p
         aria-hidden
-        className="fixed right-6 top-6 z-50 hidden text-[10px] uppercase tracking-[0.3em] text-[--color-fg-muted]/50 md:block"
+        className="fixed right-6 top-6 z-50 hidden text-[11px] uppercase tracking-[0.3em] text-[--color-fg-muted] md:block"
       >
         esc to exit
       </p>
@@ -217,14 +233,14 @@ export function CinematicExperience() {
         aria-label="Previous chapter"
         data-cursor="hover"
         onClick={() => goTo(index - 1)}
-        className="absolute inset-y-0 left-0 z-10 w-1/2 focus:outline-none"
+        className="absolute inset-y-0 left-0 z-10 w-1/2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[--color-accent]"
       />
       <button
         type="button"
         aria-label="Next chapter"
         data-cursor="hover"
         onClick={() => goTo(index + 1)}
-        className="absolute inset-y-0 right-0 z-10 w-1/2 focus:outline-none"
+        className="absolute inset-y-0 right-0 z-10 w-1/2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[--color-accent]"
       />
 
       {/* Chapter layer — pointer-events pass through to the click zones;
@@ -236,7 +252,7 @@ export function CinematicExperience() {
           <motion.div key={slide.id} className="absolute inset-0">
             <ChapterView
               slide={slide}
-              index={index}
+              isFirst={index === 0}
               reduce={reduce}
               durationSec={CHAPTER_MS[index] / 1000}
             />
@@ -266,12 +282,20 @@ export function CinematicExperience() {
             ))}
           </div>
 
-          <div className="flex items-center justify-between text-[10px] uppercase tracking-[0.28em] text-[--color-fg-muted]/70">
+          <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.28em] text-[--color-fg-muted]">
+            {/* Once the run is over `running` can never return, so the
+                pause switch becomes a replay. */}
             <button
               type="button"
-              onClick={() => setUserPaused((p) => !p)}
+              onClick={() => (finished ? goTo(0) : setUserPaused((p) => !p))}
               data-cursor="hover"
-              aria-label={userPaused ? "Resume autoplay" : "Pause autoplay"}
+              aria-label={
+                finished
+                  ? "Replay from the first chapter"
+                  : userPaused
+                    ? "Resume autoplay"
+                    : "Pause autoplay"
+              }
               className="flex items-center gap-2.5 uppercase tracking-[0.28em] transition-colors hover:text-[--color-accent]"
             >
               <svg
@@ -280,7 +304,9 @@ export function CinematicExperience() {
                 fill="currentColor"
                 aria-hidden
               >
-                {userPaused ? (
+                {finished ? (
+                  <path d="M6 1.5a4.5 4.5 0 1 0 4.24 3H8.9A3.2 3.2 0 1 1 6 2.8V4.6l2.6-1.9L6 .8z" />
+                ) : userPaused ? (
                   <path d="M3 1.5l7.5 4.5L3 10.5z" />
                 ) : (
                   <>
@@ -289,7 +315,7 @@ export function CinematicExperience() {
                   </>
                 )}
               </svg>
-              {userPaused ? "play" : "pause"}
+              {finished ? "replay" : userPaused ? "play" : "pause"}
             </button>
 
             <p>

@@ -1,6 +1,6 @@
 "use client";
 
-import type { PointerEvent, ReactNode, RefObject } from "react";
+import type { KeyboardEvent, PointerEvent, ReactNode, RefObject } from "react";
 import type { KeyboardControlsEntry } from "@react-three/drei";
 
 export type ControlName = "left" | "right" | "jump";
@@ -32,6 +32,21 @@ function HoldButton({
   };
   const release = () => onHold(false);
 
+  // Enter/Space have to hold, not click — these are movement controls, and
+  // without this the buttons are dead tab stops for keyboard users.
+  const isActivation = (key: string) => key === " " || key === "Enter";
+  const keyPress = (e: KeyboardEvent<HTMLButtonElement>) => {
+    if (!isActivation(e.key)) return;
+    e.preventDefault();
+    if (e.repeat) return;
+    onHold(true);
+  };
+  const keyRelease = (e: KeyboardEvent<HTMLButtonElement>) => {
+    if (!isActivation(e.key)) return;
+    e.preventDefault();
+    onHold(false);
+  };
+
   return (
     <button
       type="button"
@@ -41,6 +56,9 @@ function HoldButton({
       onPointerUp={release}
       onPointerCancel={release}
       onPointerLeave={release}
+      onKeyDown={keyPress}
+      onKeyUp={keyRelease}
+      onBlur={release}
       onContextMenu={(e) => e.preventDefault()}
       className="flex h-16 w-16 touch-none select-none items-center justify-center rounded-full border border-[--color-border] bg-[--color-bg-elevated]/70 text-[--color-fg] backdrop-blur-sm transition-colors active:border-[--color-accent] active:bg-[--color-accent]/15 active:text-[--color-accent]"
     >

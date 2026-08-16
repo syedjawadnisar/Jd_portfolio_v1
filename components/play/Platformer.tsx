@@ -4,8 +4,10 @@ import {
   Suspense,
   useCallback,
   useEffect,
+  useImperativeHandle,
   useRef,
   useState,
+  type Ref,
   type RefObject,
 } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
@@ -13,6 +15,7 @@ import { KeyboardControls } from "@react-three/drei";
 import { Physics } from "@react-three/rapier";
 import { AnimatePresence, motion, useMotionValue } from "framer-motion";
 import * as THREE from "three";
+import { EASE_OUT } from "@/lib/motion";
 import { Level } from "./Level";
 import { Player } from "./Player";
 import type { StageDef } from "./stages";
@@ -23,7 +26,6 @@ import {
   type TouchState,
 } from "./controls";
 
-const easeOut = [0.22, 1, 0.36, 1] as const;
 const FINISH_DELAY_MS = 650;
 
 function CameraRig({ tracker }: { tracker: RefObject<PlayerTracker> }) {
@@ -56,21 +58,51 @@ function FlagIcon() {
   );
 }
 
+export type RespawnFlashHandle = { trigger: () => void };
+
+/**
+ * Owns the respawn-fade state so a fall never re-renders <Physics>, <Level>
+ * or <Player> — the simulation tree stays mounted and untouched.
+ */
+function RespawnFlash({ ref }: { ref: Ref<RespawnFlashHandle> }) {
+  const [flash, setFlash] = useState(0);
+
+  useImperativeHandle(ref, () => ({ trigger: () => setFlash((f) => f + 1) }), []);
+
+  return (
+    <AnimatePresence>
+      {flash > 0 && (
+        <motion.div
+          key={flash}
+          className="pointer-events-none absolute inset-0 z-30 bg-[--color-bg]"
+          initial={{ opacity: 0.85 }}
+          animate={{ opacity: 0 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.7, ease: "easeOut" }}
+        />
+      )}
+    </AnimatePresence>
+  );
+}
+
 type PlatformerProps = {
   stage: StageDef;
   onFinish: () => void;
+  /** Raised when the canvas loses its WebGL context — the parent swaps in the fallback. */
+  onContextLost: () => void;
 };
 
-export function Platformer({ stage, onFinish }: PlatformerProps) {
+export function Platformer({ stage, onFinish, onContextLost }: PlatformerProps) {
   const { layout, theme } = stage;
   const touch = useRef<TouchState>({ left: false, right: false, jump: false });
   const tracker = useRef<PlayerTracker>({ x: 0, y: 1.6, vx: 0 });
   const progress = useMotionValue(0);
   const finished = useRef(false);
   const finishTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [flash, setFlash] = useState(0);
+  const flash = useRef<RespawnFlashHandle>(null);
   const [paused, setPaused] = useState(false);
   const [coarsePointer, setCoarsePointer] = useState(false);
+  const [finePointer, setFinePointer] = useState(false);
 
   // Pause the simulation when the tab is hidden.
   useEffect(() => {
@@ -79,11 +111,14 @@ export function Platformer({ stage, onFinish }: PlatformerProps) {
     return () => document.removeEventListener("visibilitychange", onVisibility);
   }, []);
 
+  // Hybrid devices (touchscreen laptops) answer yes to both: they get the
+  // thumb cluster *and* the keyboard hint, rather than one at the other's cost.
   useEffect(() => {
     setCoarsePointer(
       window.matchMedia("(pointer: coarse)").matches ||
         navigator.maxTouchPoints > 0,
     );
+    setFinePointer(window.matchMedia("(pointer: fine)").matches);
     return () => {
       if (finishTimer.current) clearTimeout(finishTimer.current);
     };
@@ -95,6 +130,23 @@ export function Platformer({ stage, onFinish }: PlatformerProps) {
     finishTimer.current = setTimeout(onFinish, FINISH_DELAY_MS);
   }, [onFinish]);
 
+  /** The escape hatch: leave the course without clearing it. */
+  const skipCourse = useCallback(() => {
+    if (finished.current) return;
+    finished.current = true;
+    onFinish();
+  }, [onFinish]);
+
+  const handleRespawn = useCallback(() => flash.current?.trigger(), []);
+
+  const handleContextLost = useCallback(
+    (e: Event) => {
+      e.preventDefault();
+      onContextLost();
+    },
+    [onContextLost],
+  );
+
   return (
     <div className="absolute inset-0 overflow-hidden">
       <KeyboardControls map={keyboardMap}>
@@ -102,6 +154,11 @@ export function Platformer({ stage, onFinish }: PlatformerProps) {
           camera={{ position: [1, 2.1, 9.5], fov: 50 }}
           dpr={[1, 1.75]}
           gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
+          onCreated={({ gl }) =>
+            gl.domElement.addEventListener("webglcontextlost", handleContextLost, {
+              once: true,
+            })
+          }
         >
           <fog attach="fog" args={[theme.fog, 20, 55]} />
           <ambientLight intensity={0.65} />
@@ -114,7 +171,7 @@ export function Platformer({ stage, onFinish }: PlatformerProps) {
                 tracker={tracker}
                 progress={progress}
                 finishX={layout.finishX}
-                onRespawn={() => setFlash((f) => f + 1)}
+                onRespawn={handleRespawn}
               />
             </Physics>
           </Suspense>
@@ -122,16 +179,26 @@ export function Platformer({ stage, onFinish }: PlatformerProps) {
         </Canvas>
       </KeyboardControls>
 
+      {/* Leaving the course is always one click away — no infinite respawn trap. */}
+      <button
+        type="button"
+        onClick={skipCourse}
+        data-cursor="hover"
+        className="absolute left-6 top-14 z-20 text-[11px] uppercase tracking-[0.3em] text-[--color-fg-muted] underline decoration-[--color-border] underline-offset-4 transition-colors hover:text-[--stage-accent] hover:decoration-[--stage-accent]"
+      >
+        skip the course
+      </button>
+
       {/* Objective */}
       <div className="pointer-events-none absolute inset-x-0 top-20 z-10 px-6 text-center">
-        <motion.h2
+        <motion.h1
           className="font-display text-3xl italic tracking-tight md:text-4xl"
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.7, ease: easeOut }}
+          transition={{ delay: 0.2, duration: 0.7, ease: EASE_OUT }}
         >
           {stage.course.title}
-        </motion.h2>
+        </motion.h1>
         <motion.p
           className="mt-2 text-xs uppercase tracking-[0.25em] text-[--color-fg-muted]"
           initial={{ opacity: 0 }}
@@ -145,7 +212,7 @@ export function Platformer({ stage, onFinish }: PlatformerProps) {
       {coarsePointer && <TouchControls touch={touch} />}
 
       {/* Keys hint for keyboard users */}
-      {!coarsePointer && (
+      {finePointer && (
         <motion.p
           className="pointer-events-none absolute inset-x-0 bottom-14 z-10 text-center text-[11px] uppercase tracking-[0.25em] text-[--color-fg-muted]/80"
           initial={{ opacity: 0 }}
@@ -173,18 +240,7 @@ export function Platformer({ stage, onFinish }: PlatformerProps) {
       </div>
 
       {/* Soft fade on respawn */}
-      <AnimatePresence>
-        {flash > 0 && (
-          <motion.div
-            key={flash}
-            className="pointer-events-none absolute inset-0 z-30 bg-[--color-bg]"
-            initial={{ opacity: 0.85 }}
-            animate={{ opacity: 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.7, ease: "easeOut" }}
-          />
-        )}
-      </AnimatePresence>
+      <RespawnFlash ref={flash} />
     </div>
   );
 }

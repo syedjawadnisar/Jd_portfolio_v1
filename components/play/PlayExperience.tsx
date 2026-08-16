@@ -1,14 +1,21 @@
 "use client";
 
-import { useEffect, useState, type CSSProperties } from "react";
-import Link from "next/link";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
+import dynamic from "next/dynamic";
 import { AnimatePresence, motion } from "framer-motion";
 import { bio } from "@/data/bio";
 import { cn } from "@/lib/utils";
+import { EASE_OUT } from "@/lib/motion";
+import { BackLink } from "@/components/ui/BackLink";
+import { JourneyFooter } from "@/components/footer/JourneyFooter";
 import { Question } from "./Question";
-import { Platformer } from "./Platformer";
 import { StageCheckpoint } from "./StageCheckpoint";
-import { RewardScene } from "./RewardScene";
 import {
   buildFinale,
   stages,
@@ -17,7 +24,17 @@ import {
   type StageChip,
 } from "./stages";
 
-const easeOut = [0.22, 1, 0.36, 1] as const;
+// The question step is pure DOM. Keeping the physics and the SVG finale in
+// their own chunks lets it paint without waiting on three/rapier.
+const Platformer = dynamic(
+  () => import("./Platformer").then((m) => m.Platformer),
+  { ssr: false, loading: () => null },
+);
+
+const RewardScene = dynamic(
+  () => import("./RewardScene").then((m) => m.RewardScene),
+  { ssr: false, loading: () => null },
+);
 
 /**
  * The journey is finite by construction: question → run for each of the
@@ -37,10 +54,10 @@ function detectWebGL(): boolean {
 
 function WebGLFallback() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center px-6 py-24">
+    <main className="flex min-h-[100svh] flex-col items-center justify-center px-6 py-24">
       <div className="w-full max-w-lg rounded-2xl border border-[--color-border] bg-[--color-bg-elevated]/60 p-8 text-center backdrop-blur-sm md:p-10">
         <p className="mb-4 text-xs uppercase tracking-[0.3em] text-[--color-fg-muted]">
-          Path C — The Interactive Journey
+          The Interactive Journey
         </p>
         <h1 className="text-balance font-display text-3xl italic tracking-tight md:text-4xl">
           Your browser sat this game out.
@@ -57,13 +74,7 @@ function WebGLFallback() {
           {bio.contact.email}
         </a>
         <div className="mt-6">
-          <Link
-            href="/"
-            data-cursor="hover"
-            className="text-xs uppercase tracking-widest text-[--color-fg-muted] transition-colors hover:text-[--color-accent]"
-          >
-            ← back to home
-          </Link>
+          <BackLink />
         </div>
       </div>
     </main>
@@ -72,9 +83,15 @@ function WebGLFallback() {
 
 function StageIndicator({ stageIndex, name }: { stageIndex: number; name: string }) {
   return (
-    <div className="fixed right-6 top-6 z-50 flex items-center gap-3">
-      <p className="hidden text-xs uppercase tracking-widest text-[--color-fg-muted] sm:block">
-        stage {stageIndex + 1} of 3 — {name}
+    <div className="absolute right-6 top-6 z-50 flex items-center gap-3">
+      <p className="sr-only">
+        Stage {stageIndex + 1} of {stages.length} — {name}
+      </p>
+      <p
+        aria-hidden
+        className="hidden text-xs uppercase tracking-widest text-[--color-fg-muted] sm:block"
+      >
+        stage {stageIndex + 1} of {stages.length} — {name}
       </p>
       <div className="flex gap-1.5" aria-hidden>
         {stages.map((s, i) => (
@@ -96,42 +113,84 @@ function StageIndicator({ stageIndex, name }: { stageIndex: number; name: string
 export function PlayExperience() {
   const [webgl, setWebgl] = useState<boolean | null>(null);
   const [stageIndex, setStageIndex] = useState(0);
-  const [step, setStep] = useState<Step>("question");
+  const [step, setStepState] = useState<Step>("question");
   const [answers, setAnswers] = useState<StageAnswer[]>([]);
+
+  // Every transition is guarded on this ref, not on the `step` closure: an
+  // exiting AnimatePresence child still holds the handler from the render
+  // that mounted it, so a double-click would otherwise advance twice.
+  const stepRef = useRef<Step>("question");
+  const setStep = useCallback((next: Step) => {
+    stepRef.current = next;
+    setStepState(next);
+  }, []);
 
   useEffect(() => {
     setWebgl(detectWebGL());
   }, []);
 
-  if (webgl === null) return <main className="min-h-screen" />;
+  // Warm the physics chunk while the question is on screen, so the run step
+  // starts instantly without blocking the first paint.
+  useEffect(() => {
+    if (step === "question") void import("./Platformer");
+  }, [step]);
+
+  // AnimatePresence swaps the focused element out from under the user; each
+  // step root takes focus on mount so focus never falls back to <body>.
+  const mounted = useRef(false);
+  const focusStepRoot = useCallback((node: HTMLDivElement | null) => {
+    if (!node) return;
+    if (!mounted.current) {
+      mounted.current = true;
+      return;
+    }
+    node.focus({ preventScroll: true });
+  }, []);
+
+  const handleContextLost = useCallback(() => setWebgl(false), []);
+
+  if (webgl === null) return <main className="min-h-[100svh]" />;
   if (!webgl) return <WebGLFallback />;
 
   const stage = stages[stageIndex];
   const lastStage = stageIndex === stages.length - 1;
 
   const handleAnswer = (chip: StageChip) => {
+    if (stepRef.current !== "question") return;
     setAnswers((prev) => [...prev.slice(0, stageIndex), toAnswer(stage, chip)]);
     setStep("run");
   };
 
   const handleCourseCleared = () => {
+    if (stepRef.current !== "run") return;
     setStep(lastStage ? "finale" : "checkpoint");
   };
 
   const handleNextStage = () => {
+    if (stepRef.current !== "checkpoint") return;
     setStageIndex((i) => Math.min(i + 1, stages.length - 1));
     setStep("question");
   };
 
   const handlePlayAgain = () => {
+    if (stepRef.current !== "finale") return;
     setAnswers([]);
     setStageIndex(0);
     setStep("question");
   };
 
+  const announcement =
+    step === "question"
+      ? `Stage ${stageIndex + 1} of ${stages.length}: ${stage.name}. Question.`
+      : step === "run"
+        ? `Stage ${stageIndex + 1} of ${stages.length}: ${stage.name}. Course started.`
+        : step === "checkpoint"
+          ? `Checkpoint. ${stage.name} cleared.`
+          : "Finale. Your reward is ready.";
+
   return (
     <main
-      className="relative min-h-screen overflow-hidden"
+      className="relative"
       style={
         {
           "--stage-accent": stage.theme.accent,
@@ -139,89 +198,109 @@ export function PlayExperience() {
         } as CSSProperties
       }
     >
-      {/* Per-stage backdrop glows, crossfaded as the palette shifts */}
-      {stages.map((s, i) => (
-        <motion.div
-          key={s.id}
-          aria-hidden
-          className="pointer-events-none absolute inset-0 -z-10"
-          style={{
-            background: `radial-gradient(circle at 50% 30%, ${s.theme.bgGlow}, transparent 60%)`,
-          }}
-          initial={false}
-          animate={{ opacity: i === stageIndex ? 1 : 0 }}
-          transition={{ duration: 1.1, ease: easeOut }}
-        />
-      ))}
+      <p aria-live="polite" className="sr-only">
+        {announcement}
+      </p>
 
-      <Link
-        href="/"
-        data-cursor="hover"
-        className="fixed left-6 top-6 z-50 text-xs uppercase tracking-widest text-[--color-fg-muted] transition-colors hover:text-[--stage-accent]"
-      >
-        ← back
-      </Link>
-
-      <StageIndicator stageIndex={stageIndex} name={stage.name} />
-
-      <AnimatePresence mode="wait">
-        {step === "question" && (
+      <div className="relative min-h-[100svh] overflow-hidden">
+        {/* Per-stage backdrop glows, crossfaded as the palette shifts */}
+        {stages.map((s, i) => (
           <motion.div
-            key={`question-${stage.id}`}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5, ease: easeOut }}
-          >
-            <Question stage={stage} onAnswer={handleAnswer} />
-          </motion.div>
-        )}
+            key={s.id}
+            aria-hidden
+            className="pointer-events-none absolute inset-0 -z-10"
+            style={{
+              background: `radial-gradient(circle at 50% 30%, ${s.theme.bgGlow}, transparent 60%)`,
+            }}
+            initial={false}
+            animate={{ opacity: i === stageIndex ? 1 : 0 }}
+            transition={{ duration: 1.1, ease: EASE_OUT }}
+          />
+        ))}
 
-        {step === "run" && (
-          <motion.div
-            key={`run-${stage.id}`}
-            className="relative h-screen"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.6, ease: easeOut }}
-          >
-            <Platformer stage={stage} onFinish={handleCourseCleared} />
-          </motion.div>
-        )}
+        <BackLink stageAccent className="absolute left-6 top-6 z-50" />
 
-        {step === "checkpoint" && answers[stageIndex] && !lastStage && (
-          <motion.div
-            key={`checkpoint-${stage.id}`}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5, ease: easeOut }}
-          >
-            <StageCheckpoint
-              stage={stage}
-              nextStage={stages[stageIndex + 1]}
-              answer={answers[stageIndex]}
-              onNext={handleNextStage}
-            />
-          </motion.div>
-        )}
+        <StageIndicator stageIndex={stageIndex} name={stage.name} />
 
-        {step === "finale" && answers.length === stages.length && (
-          <motion.div
-            key="finale"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.6, ease: easeOut }}
-          >
-            <RewardScene
-              message={buildFinale(answers)}
-              onPlayAgain={handlePlayAgain}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+        <AnimatePresence mode="wait">
+          {step === "question" && (
+            <motion.div
+              key={`question-${stage.id}`}
+              ref={focusStepRoot}
+              tabIndex={-1}
+              className="outline-none"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1, pointerEvents: "auto" }}
+              exit={{ opacity: 0, pointerEvents: "none" }}
+              transition={{ duration: 0.5, ease: EASE_OUT }}
+            >
+              <Question stage={stage} onAnswer={handleAnswer} />
+            </motion.div>
+          )}
+
+          {step === "run" && (
+            <motion.div
+              key={`run-${stage.id}`}
+              ref={focusStepRoot}
+              tabIndex={-1}
+              className="relative h-[100svh] outline-none"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1, pointerEvents: "auto" }}
+              exit={{ opacity: 0, pointerEvents: "none" }}
+              transition={{ duration: 0.6, ease: EASE_OUT }}
+            >
+              <Platformer
+                stage={stage}
+                onFinish={handleCourseCleared}
+                onContextLost={handleContextLost}
+              />
+            </motion.div>
+          )}
+
+          {step === "checkpoint" && answers[stageIndex] && !lastStage && (
+            <motion.div
+              key={`checkpoint-${stage.id}`}
+              ref={focusStepRoot}
+              tabIndex={-1}
+              className="outline-none"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1, pointerEvents: "auto" }}
+              exit={{ opacity: 0, pointerEvents: "none" }}
+              transition={{ duration: 0.5, ease: EASE_OUT }}
+            >
+              <StageCheckpoint
+                stage={stage}
+                nextStage={stages[stageIndex + 1]}
+                answer={answers[stageIndex]}
+                onNext={handleNextStage}
+              />
+            </motion.div>
+          )}
+
+          {step === "finale" && (
+            <motion.div
+              key="finale"
+              ref={focusStepRoot}
+              tabIndex={-1}
+              className="outline-none"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1, pointerEvents: "auto" }}
+              exit={{ opacity: 0, pointerEvents: "none" }}
+              transition={{ duration: 0.6, ease: EASE_OUT }}
+            >
+              <RewardScene
+                message={buildFinale(answers)}
+                onPlayAgain={handlePlayAgain}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Contact is never gated behind finishing the game. It is withheld only
+          during the run itself, where a scrollable page would break the
+          fixed-viewport course — and "skip the course" exits that in one click. */}
+      {step !== "run" && <JourneyFooter />}
     </main>
   );
 }

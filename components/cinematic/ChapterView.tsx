@@ -5,9 +5,10 @@ import { bio } from "@/data/bio";
 import { featuredProjects } from "@/data/projects";
 import { skillCategories } from "@/data/skills";
 import { YEARS_TOKEN, type Slide, type SlideItem } from "@/data/slides";
-import { yearsWord } from "@/lib/experience";
+import { numberWord } from "@/lib/experience";
 import { useExperienceYears } from "@/lib/experience-client";
 import { cn } from "@/lib/utils";
+import { ScrollHint } from "@/components/ui/ScrollHint";
 import { CountUp, DriftLayer, EASE, KineticHeading, exitUp } from "./kinetic";
 
 /* ------------------------------------------------------------------ */
@@ -218,16 +219,21 @@ function ProjectSweep({
 
 export function ChapterView({
   slide,
-  index,
+  isFirst,
   reduce,
   durationSec,
 }: {
   slide: Slide;
-  index: number;
+  /** The opening chapter carries the route's only h1. */
+  isFirst: boolean;
   reduce: boolean;
   durationSec: number;
 }) {
   const years = useExperienceYears();
+
+  // The ghost numeral mirrors the kicker's own number ("01 — Who") rather
+  // than the deck position — the hook slide is unnumbered by design.
+  const numeral = slide.kicker.match(/^\s*(\d+)/)?.[1] ?? null;
 
   const isProjects = Boolean(slide.items?.some((it) => it.meta));
   const isSkills = Boolean(slide.items) && !isProjects;
@@ -238,7 +244,7 @@ export function ChapterView({
   // statically prerendered HTML never bakes in a stale number.
   const heading = slide.heading.map((seg) =>
     seg.text.includes(YEARS_TOKEN)
-      ? { ...seg, text: seg.text.replace(YEARS_TOKEN, yearsWord(years)) }
+      ? { ...seg, text: seg.text.replace(YEARS_TOKEN, numberWord(years)) }
       : seg,
   );
 
@@ -256,30 +262,32 @@ export function ChapterView({
       )}
     >
       {/* Ghost chapter numeral — deepest parallax layer */}
-      <DriftLayer
-        driftY={14}
-        duration={durationSec}
-        reduce={reduce}
-        className="pointer-events-none absolute bottom-[2vh] right-[1vw] select-none"
-      >
-        <motion.span
-          aria-hidden
-          initial={reduce ? { opacity: 0 } : { opacity: 0, y: 70 }}
-          animate={
-            reduce
-              ? { opacity: 1, transition: { duration: 0.6 } }
-              : {
-                  opacity: 1,
-                  y: 0,
-                  transition: { duration: 1.7, delay: 0.2, ease: EASE },
-                }
-          }
-          exit={exitUp(reduce, 2)}
-          className="block font-display italic leading-none text-[--color-fg]/[0.05] text-[36vw] md:text-[22vw]"
+      {numeral && (
+        <DriftLayer
+          driftY={14}
+          duration={durationSec}
+          reduce={reduce}
+          className="pointer-events-none absolute bottom-[2vh] right-[1vw] select-none"
         >
-          {String(index + 1).padStart(2, "0")}
-        </motion.span>
-      </DriftLayer>
+          <motion.span
+            aria-hidden
+            initial={reduce ? { opacity: 0 } : { opacity: 0, y: 70 }}
+            animate={
+              reduce
+                ? { opacity: 1, transition: { duration: 0.6 } }
+                : {
+                    opacity: 1,
+                    y: 0,
+                    transition: { duration: 1.7, delay: 0.2, ease: EASE },
+                  }
+            }
+            exit={exitUp(reduce, 2)}
+            className="block font-display italic leading-none text-[--color-fg]/[0.05] text-[36vw] md:text-[22vw]"
+          >
+            {numeral}
+          </motion.span>
+        </DriftLayer>
+      )}
 
       {/* Kicker — letter-tracking settles as it fades in */}
       <motion.p
@@ -309,6 +317,7 @@ export function ChapterView({
         <KineticHeading
           segments={heading}
           reduce={reduce}
+          as={isFirst ? "h1" : "h2"}
           baseDelay={0.32}
           className={cn(
             hero
@@ -452,19 +461,12 @@ export function ChapterView({
               transition: { duration: 0.8, delay: reduce ? 0.5 : 2 },
             }}
             exit={exitUp(reduce, 3)}
-            className="mt-12 flex flex-col items-center text-[10px] uppercase tracking-[0.3em] text-[--color-fg-muted]"
+            className="mt-12"
           >
-            scroll for the handshake
-            <motion.span
-              aria-hidden
-              className="mt-3 block h-8 w-px bg-[--color-fg-muted]"
-              animate={reduce ? undefined : { scaleY: [0.4, 1, 0.4] }}
-              transition={{
-                duration: 2.4,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-              style={{ transformOrigin: "top" }}
+            <ScrollHint
+              label="scroll for the handshake"
+              tone="muted"
+              reduce={reduce}
             />
           </motion.div>
         </>

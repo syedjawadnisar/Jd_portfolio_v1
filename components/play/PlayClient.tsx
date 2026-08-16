@@ -8,7 +8,7 @@ const PlayExperience = dynamic(
   {
     ssr: false,
     loading: () => (
-      <main className="flex min-h-screen items-center justify-center">
+      <main className="flex min-h-[100svh] items-center justify-center">
         <p className="animate-pulse text-xs uppercase tracking-[0.3em] text-[--color-fg-muted]">
           loading the course
         </p>

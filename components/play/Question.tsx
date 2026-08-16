@@ -1,10 +1,9 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
+import { EASE_OUT } from "@/lib/motion";
 import { classifyFreeText, type StageChip, type StageDef } from "./stages";
-
-const easeOut = [0.22, 1, 0.36, 1] as const;
 
 type QuestionProps = {
   stage: StageDef;
@@ -13,6 +12,18 @@ type QuestionProps = {
 
 export function Question({ stage, onAnswer }: QuestionProps) {
   const [text, setText] = useState("");
+  const reduce = useReducedMotion();
+
+  /** Reduced motion keeps the fades, drops the travel and the stagger. */
+  const rise = (y: number, delay: number, duration: number) => ({
+    initial: reduce ? { opacity: 0 } : { opacity: 0, y },
+    animate: { opacity: 1, y: 0 },
+    transition: {
+      delay: reduce ? 0 : delay,
+      duration: reduce ? 0.3 : duration,
+      ease: EASE_OUT,
+    },
+  });
 
   const submitFreeText = (e: FormEvent) => {
     e.preventDefault();
@@ -21,21 +32,17 @@ export function Question({ stage, onAnswer }: QuestionProps) {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-6 py-24 text-center">
+    <div className="flex min-h-[100svh] flex-col items-center justify-center px-6 py-24 text-center">
       <motion.p
         className="mb-5 text-xs uppercase tracking-[0.3em] text-[--color-fg-muted]"
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: easeOut }}
+        {...rise(16, 0, 0.6)}
       >
         {stage.eyebrow}
       </motion.p>
 
       <motion.h1
         className="max-w-3xl text-balance font-display text-5xl italic leading-[1.05] tracking-tight md:text-7xl"
-        initial={{ opacity: 0, y: 28 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1, duration: 0.85, ease: easeOut }}
+        {...rise(28, 0.1, 0.85)}
       >
         {stage.question}
       </motion.h1>
@@ -48,10 +55,8 @@ export function Question({ stage, onAnswer }: QuestionProps) {
             data-cursor="hover"
             onClick={() => onAnswer(chip)}
             className="rounded-full border border-[--color-border] bg-[--color-bg-elevated]/60 px-5 py-2.5 text-sm text-[--color-fg] backdrop-blur-sm transition-colors duration-300 hover:border-[--stage-accent] hover:text-[--stage-accent]"
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.35 + i * 0.07, duration: 0.55, ease: easeOut }}
-            whileHover={{ y: -2 }}
+            {...rise(16, 0.35 + i * 0.07, 0.55)}
+            whileHover={reduce ? undefined : { y: -2 }}
             whileTap={{ scale: 0.97 }}
           >
             {chip.label}
@@ -60,10 +65,10 @@ export function Question({ stage, onAnswer }: QuestionProps) {
       </div>
 
       <motion.p
-        className="mt-14 text-[11px] uppercase tracking-[0.25em] text-[--color-fg-muted]/70"
+        className="mt-14 text-[11px] uppercase tracking-[0.25em] text-[--color-fg-muted]"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.8, duration: 0.7 }}
+        transition={{ delay: reduce ? 0 : 0.8, duration: reduce ? 0.3 : 0.7 }}
       >
         or tell me in your own words
       </motion.p>
@@ -73,7 +78,11 @@ export function Question({ stage, onAnswer }: QuestionProps) {
         className="mt-5 flex w-full max-w-md items-center gap-3"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.9, duration: 0.7, ease: easeOut }}
+        transition={{
+          delay: reduce ? 0 : 0.9,
+          duration: reduce ? 0.3 : 0.7,
+          ease: EASE_OUT,
+        }}
       >
         <label htmlFor="free-answer" className="sr-only">
           Or tell me in your own words
@@ -86,7 +95,7 @@ export function Question({ stage, onAnswer }: QuestionProps) {
           placeholder={stage.placeholder}
           data-cursor="hover"
           autoComplete="off"
-          className="w-full border-b border-[--color-border] bg-transparent px-1 py-2.5 text-center text-sm text-[--color-fg] outline-none transition-colors placeholder:text-[--color-fg-muted]/60 focus:border-[--stage-accent]"
+          className="w-full border-b border-[--color-border] bg-transparent px-1 py-2.5 text-center text-sm text-[--color-fg] outline-none transition-colors placeholder:text-[--color-fg-muted] focus:border-[--stage-accent]"
         />
         <button
           type="submit"

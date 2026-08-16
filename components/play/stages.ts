@@ -74,7 +74,7 @@ export type StageDef = {
   layout: LevelLayout;
 };
 
-export const PLUMBER_LINE =
+const PLUMBER_LINE =
   "Oops! No plumber found, but we can engineer the system that finds you one.";
 
 export const stages: StageDef[] = [
@@ -83,7 +83,7 @@ export const stages: StageDef[] = [
   {
     id: "brief",
     name: "The Brief",
-    eyebrow: "Path C — The Interactive Journey",
+    eyebrow: "The Interactive Journey",
     question: "What are you looking for?",
     placeholder: "e.g. a billing platform that survives Black Friday",
     chips: [

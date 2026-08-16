@@ -11,7 +11,7 @@ import {
   type RapierRigidBody,
 } from "@react-three/rapier";
 import * as THREE from "three";
-import { usePrefersReducedMotion } from "@/components/three/SilkBackground";
+import { usePrefersReducedMotion } from "@/lib/motion";
 import type { LevelLayout, StageTheme } from "./stages";
 
 /** Launch velocity from a bounce pad — apex ~5.1 with gravity 22. */
@@ -226,6 +226,41 @@ function BouncePad({
   );
 }
 
+/**
+ * Static parallax dressing. Hoisted to module scope so a respawn re-render
+ * never rebuilds the geometry elements; only the theme color is looked up
+ * per render.
+ */
+const BACKGROUND_SHAPES: {
+  pos: [number, number, number];
+  geo: ReactNode;
+  tint: "accent" | "wire";
+  opacity: number;
+  float: { speed: number; rot: number; lift: number };
+}[] = [
+  {
+    pos: [8, 3.4, -7],
+    geo: <icosahedronGeometry args={[0.9, 0]} />,
+    tint: "accent",
+    opacity: 0.18,
+    float: { speed: 1.3, rot: 0.5, lift: 0.8 },
+  },
+  {
+    pos: [19, 4.2, -9],
+    geo: <octahedronGeometry args={[0.8, 0]} />,
+    tint: "wire",
+    opacity: 0.14,
+    float: { speed: 1.7, rot: 0.4, lift: 0.6 },
+  },
+  {
+    pos: [30, 3, -8],
+    geo: <torusGeometry args={[0.7, 0.18, 10, 36]} />,
+    tint: "accent",
+    opacity: 0.16,
+    float: { speed: 1.1, rot: 0.3, lift: 0.5 },
+  },
+];
+
 function BackgroundShapes({
   theme,
   reduced,
@@ -233,43 +268,18 @@ function BackgroundShapes({
   theme: StageTheme;
   reduced: boolean;
 }) {
-  const shapes: {
-    pos: [number, number, number];
-    geo: ReactNode;
-    color: string;
-    opacity: number;
-    float: { speed: number; rot: number; lift: number };
-  }[] = [
-    {
-      pos: [8, 3.4, -7],
-      geo: <icosahedronGeometry args={[0.9, 0]} />,
-      color: theme.accent,
-      opacity: 0.18,
-      float: { speed: 1.3, rot: 0.5, lift: 0.8 },
-    },
-    {
-      pos: [19, 4.2, -9],
-      geo: <octahedronGeometry args={[0.8, 0]} />,
-      color: theme.wire,
-      opacity: 0.14,
-      float: { speed: 1.7, rot: 0.4, lift: 0.6 },
-    },
-    {
-      pos: [30, 3, -8],
-      geo: <torusGeometry args={[0.7, 0.18, 10, 36]} />,
-      color: theme.accent,
-      opacity: 0.16,
-      float: { speed: 1.1, rot: 0.3, lift: 0.5 },
-    },
-  ];
-
   return (
     <group>
-      {shapes.map((s, i) => {
+      {BACKGROUND_SHAPES.map((s, i) => {
         const mesh = (
           <mesh position={s.pos}>
             {s.geo}
-            <meshBasicMaterial color={s.color} wireframe transparent opacity={s.opacity} />
+            <meshBasicMaterial
+              color={theme[s.tint]}
+              wireframe
+              transparent
+              opacity={s.opacity}
+            />
           </mesh>
         );
         return reduced ? (

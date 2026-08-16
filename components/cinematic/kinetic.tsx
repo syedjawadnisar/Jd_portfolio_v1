@@ -8,12 +8,12 @@ import {
   type TargetAndTransition,
 } from "framer-motion";
 import type { SlideSegment } from "@/data/slides";
+import { EASE_OUT, EXIT_EASE } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
-/** Signature ease — matches the landing hero. */
-export const EASE = [0.22, 1, 0.36, 1] as const;
-/** Accelerating exit — elements leave with momentum, not a fade-in-reverse. */
-export const EXIT_EASE = [0.55, 0, 0.85, 0.4] as const;
+/** Signature ease — the site-wide curve, re-exported under the deck's name. */
+export const EASE = EASE_OUT;
+export { EXIT_EASE };
 
 /** Shared exit target — staggered, blurred momentum lift. */
 export function exitUp(reduce: boolean, order = 0): TargetAndTransition {
@@ -47,17 +47,20 @@ export function KineticHeading({
   reduce,
   baseDelay = 0.3,
   stagger = 0.08,
+  as: Tag = "h2",
   className,
 }: {
   segments: readonly SlideSegment[];
   reduce: boolean;
   baseDelay?: number;
   stagger?: number;
+  /** The deck's first chapter carries the route's h1. */
+  as?: "h1" | "h2";
   className?: string;
 }) {
   const words = splitSegments(segments);
   return (
-    <h2
+    <Tag
       className={cn(
         "text-balance font-semibold tracking-tight",
         className,
@@ -109,7 +112,7 @@ export function KineticHeading({
           {word.text}
         </motion.span>
       ))}
-    </h2>
+    </Tag>
   );
 }
 

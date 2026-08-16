@@ -3,9 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { bio } from "@/data/bio";
+import { EASE_OUT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
-
-const easeOut = [0.22, 1, 0.36, 1] as const;
 
 /* ------------------------------------------------------------------ */
 /* Game data                                                           */
@@ -135,7 +134,7 @@ function BackMark({ className }: { className?: string }) {
 /* Footer                                                              */
 /* ------------------------------------------------------------------ */
 
-export function JourneyFooter({ className }: { className?: string }) {
+export function JourneyFooter() {
   const reduce = useReducedMotion();
 
   // Deck is shuffled client-side only — pre-mount we render identical
@@ -145,6 +144,9 @@ export function JourneyFooter({ className }: { className?: string }) {
   const [matched, setMatched] = useState<GlyphId[]>([]);
   const [skipped, setSkipped] = useState(false);
   const mismatchTimer = useRef<number | null>(null);
+  // Skipping unmounts the focused skip button; hand focus to the mail link
+  // that replaces it, on mount (AnimatePresence delays that by one exit).
+  const focusMailOnMount = useRef(false);
 
   useEffect(() => {
     setDeck(buildDeck());
@@ -185,14 +187,12 @@ export function JourneyFooter({ className }: { className?: string }) {
   }
 
   const cells: readonly (Card | null)[] = deck ?? Array(8).fill(null);
+  const lastUnlocked = matched.length > 0 ? matched[matched.length - 1] : null;
 
   return (
     <section
       id="contact"
-      className={cn(
-        "relative flex min-h-screen flex-col items-center justify-center px-6 py-24",
-        className,
-      )}
+      className="relative flex min-h-screen flex-col items-center justify-center px-6 py-24"
     >
       <div className="flex w-full max-w-4xl flex-col items-center text-center">
         {/* Heading */}
@@ -200,7 +200,7 @@ export function JourneyFooter({ className }: { className?: string }) {
           initial={reduce ? false : { opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true, amount: 0.5 }}
-          transition={{ duration: reduce ? 0 : 0.8, ease: easeOut }}
+          transition={{ duration: reduce ? 0 : 0.8, ease: EASE_OUT }}
           className="mb-4 text-xs uppercase tracking-[0.3em] text-[--color-fg-muted]"
         >
           Your move
@@ -218,7 +218,7 @@ export function JourneyFooter({ className }: { className?: string }) {
               transition={{
                 duration: reduce ? 0 : 0.7,
                 delay: reduce ? 0 : i * 0.05,
-                ease: easeOut,
+                ease: EASE_OUT,
               }}
               className={cn(
                 "mr-[0.22em] inline-block",
@@ -238,7 +238,7 @@ export function JourneyFooter({ className }: { className?: string }) {
           transition={{
             duration: reduce ? 0 : 0.6,
             delay: reduce ? 0 : 0.5,
-            ease: easeOut,
+            ease: EASE_OUT,
           }}
           className="mx-auto mt-6 max-w-xl text-balance text-base text-[--color-fg-muted] md:text-lg"
         >
@@ -254,7 +254,7 @@ export function JourneyFooter({ className }: { className?: string }) {
           transition={{
             duration: reduce ? 0 : 0.7,
             delay: reduce ? 0 : 0.3,
-            ease: easeOut,
+            ease: EASE_OUT,
           }}
           className="mt-14 w-full max-w-[26rem] md:max-w-[30rem]"
         >
@@ -272,6 +272,10 @@ export function JourneyFooter({ className }: { className?: string }) {
                   flipped.includes(i));
               const isMatched =
                 card !== null && (complete || matched.includes(card.glyph));
+              // Every branch flipCard() bails on — mirrored so assistive tech
+              // is told the card is inert instead of silently doing nothing.
+              const isLocked =
+                card === null || complete || isUp || flipped.length >= 2;
 
               return (
                 <button
@@ -279,10 +283,11 @@ export function JourneyFooter({ className }: { className?: string }) {
                   type="button"
                   data-cursor="hover"
                   onClick={() => flipCard(i)}
+                  aria-disabled={isLocked || undefined}
                   aria-label={
                     isUp && card
-                      ? `Card face up: ${GLYPH_NAMES[card.glyph]}`
-                      : "Face-down card — flip it"
+                      ? `Card ${i + 1} of 8, face up: ${GLYPH_NAMES[card.glyph]}`
+                      : `Card ${i + 1} of 8, face down — flip it`
                   }
                   className="group relative aspect-[3/4] w-full select-none rounded-xl [perspective:900px]"
                 >
@@ -292,7 +297,7 @@ export function JourneyFooter({ className }: { className?: string }) {
                     transition={
                       reduce
                         ? { duration: 0 }
-                        : { duration: 0.55, ease: easeOut }
+                        : { duration: 0.55, ease: EASE_OUT }
                     }
                   >
                     {/* Back */}
@@ -328,7 +333,13 @@ export function JourneyFooter({ className }: { className?: string }) {
           </div>
 
           <p aria-live="polite" className="sr-only">
-            {revealed.length} of 4 pairs matched
+            {skipped
+              ? "Game skipped. All four contact channels unlocked."
+              : `${revealed.length} of 4 pairs matched.${
+                  lastUnlocked
+                    ? ` ${FRAGMENTS[lastUnlocked].label} unlocked.`
+                    : ""
+                }`}
           </p>
         </motion.div>
 
@@ -342,7 +353,7 @@ export function JourneyFooter({ className }: { className?: string }) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{
                   duration: reduce ? 0.2 : 0.7,
-                  ease: easeOut,
+                  ease: EASE_OUT,
                 }}
                 className="flex flex-col items-center"
               >
@@ -359,6 +370,12 @@ export function JourneyFooter({ className }: { className?: string }) {
 
                 <a
                   href={`mailto:${bio.contact.email}`}
+                  ref={(node) => {
+                    if (node && focusMailOnMount.current) {
+                      focusMailOnMount.current = false;
+                      node.focus();
+                    }
+                  }}
                   data-cursor="hover"
                   className="mt-8 rounded-full border border-[--color-accent] bg-[--color-accent]/10 px-8 py-3 text-sm font-medium uppercase tracking-[0.2em] text-[--color-accent] transition-colors hover:bg-[--color-accent]/20"
                 >
@@ -402,7 +419,7 @@ export function JourneyFooter({ className }: { className?: string }) {
                     : {
                         opacity: 0,
                         y: -12,
-                        transition: { duration: 0.3, ease: easeOut },
+                        transition: { duration: 0.3, ease: EASE_OUT },
                       }
                 }
                 className="flex flex-col items-center"
@@ -424,7 +441,7 @@ export function JourneyFooter({ className }: { className?: string }) {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{
                           duration: reduce ? 0.2 : 0.5,
-                          ease: easeOut,
+                          ease: EASE_OUT,
                         }}
                         className="rounded-full border border-[--color-accent]/60 bg-[--color-accent]/10 px-5 py-2 text-sm text-[--color-accent] transition-colors hover:bg-[--color-accent]/20"
                       >
@@ -444,7 +461,10 @@ export function JourneyFooter({ className }: { className?: string }) {
 
                 <button
                   type="button"
-                  onClick={() => setSkipped(true)}
+                  onClick={() => {
+                    focusMailOnMount.current = true;
+                    setSkipped(true);
+                  }}
                   data-cursor="hover"
                   className="mt-8 text-xs uppercase tracking-[0.2em] text-[--color-fg-muted] underline decoration-[--color-border] underline-offset-4 transition-colors hover:text-[--color-accent] hover:decoration-[--color-accent]"
                 >

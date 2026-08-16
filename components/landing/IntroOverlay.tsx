@@ -2,9 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { EASE_OUT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
-
-const easeOut = [0.22, 1, 0.36, 1] as const;
 
 const SESSION_KEY = "jn-intro-seen";
 
@@ -83,11 +82,22 @@ export function IntroOverlay() {
               : {
                   y: "-100%",
                   pointerEvents: "none",
-                  transition: { duration: 0.7, ease: easeOut },
+                  transition: { duration: 0.7, ease: EASE_OUT },
                 }
           }
-          className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[--color-bg]"
+          className={cn(
+            "fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[--color-bg]",
+            // "boot" is the prerendered / pre-hydration state. The CSS
+            // keyframe lifts the curtain on its own if React never takes
+            // over; React drops the class on mount so it cannot fight the
+            // framer-motion exit.
+            phase === "boot" && "intro-curtain-fallback",
+          )}
         >
+          <noscript>
+            <style>{`.intro-curtain-fallback { display: none; }`}</style>
+          </noscript>
+
           <p className="text-5xl font-semibold tracking-tight text-[--color-fg] md:text-7xl">
             {WORDS.map((word, w) => (
               <span
@@ -114,7 +124,7 @@ export function IntroOverlay() {
                       transition={
                         reduced
                           ? { duration: 0 }
-                          : { duration: 0.7, delay, ease: easeOut }
+                          : { duration: 0.7, delay, ease: EASE_OUT }
                       }
                     >
                       {ch}
@@ -133,7 +143,7 @@ export function IntroOverlay() {
               transition={
                 reduced
                   ? { duration: 0 }
-                  : { duration: 1.3, delay: 0.12, ease: easeOut }
+                  : { duration: 1.3, delay: 0.12, ease: EASE_OUT }
               }
             />
           </span>

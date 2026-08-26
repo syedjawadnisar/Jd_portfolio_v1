@@ -14,7 +14,7 @@ export type Project = {
    * procedural fallback whenever this is missing, and next/image must never be
    * pointed at a file that is not on disk.
    *
-   * Expected filenames (16:10, webp — see public/images/README.md):
+   * Expected filenames (16:10, webp — see workspace/guides/image-assets.md):
    *   toptal.webp · cellcloud.webp · moemate.webp · chiirp.webp · docuseal.webp
    */
   image?: string;

@@ -28,9 +28,30 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+
+  // Nothing is gained by advertising the framework and its version in every
+  // response header.
+  poweredByHeader: false,
+
   experimental: {
-    optimizePackageImports: ["three", "@react-three/drei", "framer-motion"],
+    // `three` is deliberately absent: the flag rewrites named imports into
+    // deep paths, and every three consumer here does `import * as THREE`,
+    // which it cannot touch. drei and framer-motion are both barrel packages
+    // imported by name, so they are the two that actually benefit.
+    optimizePackageImports: ["@react-three/drei", "framer-motion"],
   },
+
+  /**
+   * `/explore` was the scroll experience before it became the default
+   * behavior of `/`. Shared and indexed links have to keep resolving, but
+   * that is a routing concern, not a page: as a `permanentRedirect()` page it
+   * cost a prerendered route and a React render to emit one header. Here the
+   * answer comes before any rendering happens.
+   */
+  async redirects() {
+    return [{ source: "/explore", destination: "/", permanent: true }];
+  },
+
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

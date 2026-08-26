@@ -15,7 +15,7 @@ import { KeyboardControls } from "@react-three/drei";
 import { Physics } from "@react-three/rapier";
 import { AnimatePresence, motion, useMotionValue } from "framer-motion";
 import * as THREE from "three";
-import { EASE_OUT } from "@/lib/motion";
+import { canvasDpr, EASE_OUT } from "@/lib/motion";
 import { Level } from "./Level";
 import { Player } from "./Player";
 import type { StageDef } from "./stages";
@@ -27,6 +27,23 @@ import {
 } from "./controls";
 
 const FINISH_DELAY_MS = 650;
+
+/**
+ * Probed during the first render, not in an effect: WebGL context options are
+ * fixed when the context is created, so a value that arrives one tick later
+ * cannot gate antialiasing. Safe to touch `window` here — this module is only
+ * ever reached through a dynamic import with `ssr: false`.
+ *
+ * Hybrid devices (touchscreen laptops) answer yes to both this and
+ * `(pointer: fine)`: they get the thumb cluster *and* the keyboard hint,
+ * rather than one at the other's cost.
+ */
+function detectCoarsePointer(): boolean {
+  return (
+    window.matchMedia("(pointer: coarse)").matches ||
+    navigator.maxTouchPoints > 0
+  );
+}
 
 function CameraRig({ tracker }: { tracker: RefObject<PlayerTracker> }) {
   useFrame(({ camera }, delta) => {
@@ -101,7 +118,7 @@ export function Platformer({ stage, onFinish, onContextLost }: PlatformerProps) 
   const finishTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const flash = useRef<RespawnFlashHandle>(null);
   const [paused, setPaused] = useState(false);
-  const [coarsePointer, setCoarsePointer] = useState(false);
+  const [coarsePointer] = useState(detectCoarsePointer);
   const [finePointer, setFinePointer] = useState(false);
 
   // Pause the simulation when the tab is hidden.
@@ -111,13 +128,7 @@ export function Platformer({ stage, onFinish, onContextLost }: PlatformerProps) 
     return () => document.removeEventListener("visibilitychange", onVisibility);
   }, []);
 
-  // Hybrid devices (touchscreen laptops) answer yes to both: they get the
-  // thumb cluster *and* the keyboard hint, rather than one at the other's cost.
   useEffect(() => {
-    setCoarsePointer(
-      window.matchMedia("(pointer: coarse)").matches ||
-        navigator.maxTouchPoints > 0,
-    );
     setFinePointer(window.matchMedia("(pointer: fine)").matches);
     return () => {
       if (finishTimer.current) clearTimeout(finishTimer.current);
@@ -152,8 +163,16 @@ export function Platformer({ stage, onFinish, onContextLost }: PlatformerProps) 
       <KeyboardControls map={keyboardMap}>
         <Canvas
           camera={{ position: [1, 2.1, 9.5], fov: 50 }}
-          dpr={[1, 1.75]}
-          gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
+          // The heaviest scene on the site: a rapier step every frame plus
+          // lit, fogged surfaces. It gets the same coarse-pointer clamp as
+          // every other canvas here — desktop is unchanged, phones stop
+          // rendering the simulation at 1.75x device pixels.
+          dpr={canvasDpr(coarsePointer)}
+          gl={{
+            antialias: !coarsePointer,
+            alpha: true,
+            powerPreference: "high-performance",
+          }}
           onCreated={({ gl }) =>
             gl.domElement.addEventListener("webglcontextlost", handleContextLost, {
               once: true,
@@ -184,7 +203,11 @@ export function Platformer({ stage, onFinish, onContextLost }: PlatformerProps) 
         type="button"
         onClick={skipCourse}
         data-cursor="hover"
-        className="absolute left-6 top-14 z-20 text-[11px] uppercase tracking-[0.3em] text-[--color-fg-muted] underline decoration-[--color-border] underline-offset-4 transition-colors hover:text-[--stage-accent] hover:decoration-[--stage-accent]"
+        // Moved off the left rail: it used to sit 32px under BackLink, two
+        // unpadded 13px-tall text targets stacked on a touch game screen —
+        // and missing "skip" to hit "home" loses the run. The pseudo-element
+        // gives it a 44px+ hit area without moving the label.
+        className="absolute right-6 top-16 z-20 text-[11px] uppercase tracking-[0.3em] text-[--color-fg-muted] underline decoration-[--color-border] underline-offset-4 transition-colors after:absolute after:-inset-x-3 after:-inset-y-4 after:content-[''] hover:text-[--stage-accent] hover:decoration-[--stage-accent]"
       >
         skip the course
       </button>

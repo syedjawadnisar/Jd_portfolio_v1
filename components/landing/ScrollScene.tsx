@@ -136,11 +136,14 @@ export function ScrollScene() {
         camera={{ position: [0, 0, 7], fov: 55 }}
         dpr={canvasDpr(coarse)}
         gl={{
-          antialias: true,
+          // Multisampling on a phone buys smoother particle edges at a cost
+          // the frame budget cannot absorb.
+          antialias: !coarse,
           // SilkPlane writes alpha 1.0 to every pixel, so an alpha buffer
           // would only cost the compositor a blend pass for nothing.
           alpha: false,
-          powerPreference: "high-performance",
+          // Decorative surface: no reason to demand the discrete GPU.
+          powerPreference: "default",
         }}
         onCreated={({ gl }) => {
           gl.domElement.addEventListener(

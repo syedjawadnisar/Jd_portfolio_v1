@@ -162,14 +162,22 @@ const fragmentShaderFor = (octaves: number) =>
  */
 export function SilkPlane({ variant = "calm" }: { variant?: SilkVariant }) {
   const reduced = usePrefersReducedMotion();
+  const coarse = useCoarsePointer();
   const timeRef = useRef(40); // start mid-flow, not at the noise origin
   const pointerTarget = useMemo(() => new THREE.Vector2(), []);
 
   const material = useMemo(() => {
     const preset = PRESETS[variant];
+    // The octave count was device-independent, so /cinematic ran the 4-octave
+    // preset on phones: five fbm calls x four octaves = twenty simplex
+    // evaluations per pixel per frame. Coarse pointers drop one octave — the
+    // fold structure survives, the thermal budget does too.
+    const octaves = coarse
+      ? Math.max(2, preset.octaves - 1)
+      : preset.octaves;
     return new THREE.ShaderMaterial({
       vertexShader,
-      fragmentShader: fragmentShaderFor(preset.octaves),
+      fragmentShader: fragmentShaderFor(octaves),
       depthTest: false,
       depthWrite: false,
       uniforms: {
@@ -183,7 +191,7 @@ export function SilkPlane({ variant = "calm" }: { variant?: SilkVariant }) {
         uAccent2: { value: rgb(ACCENT_2) },
       },
     });
-  }, [variant]);
+  }, [variant, coarse]);
 
   useEffect(() => () => material.dispose(), [material]);
 
@@ -258,7 +266,9 @@ export function SilkBackground({
           // The quad needs no AA — it is a single full-screen triangle pair.
           antialias: false,
           alpha: false,
-          powerPreference: "high-performance",
+          // Decorative surface: asking for the discrete GPU costs battery and
+          // heat for a backdrop.
+          powerPreference: "default",
         }}
         onCreated={({ gl }) => {
           gl.domElement.addEventListener(

@@ -37,11 +37,22 @@ export function usePrefersReducedMotion(): boolean {
 }
 
 /**
- * Coarse-pointer flag — used to cap canvas device-pixel-ratio on phones,
- * where the fragment-heavy silk shader is the frame budget.
+ * Coarse-pointer flag — used to cap canvas device-pixel-ratio, shader octave
+ * count and antialiasing on phones, where the fragment-heavy silk shader is
+ * the frame budget.
+ *
+ * The initial value is probed during the first render, not in the effect:
+ * WebGL context options (antialias) are frozen when the context is created,
+ * and a shader that recompiles one tick later throws away its first compile.
+ * Every consumer sits behind a dynamic import with `ssr: false`, so the probe
+ * never runs on the server; the listener still tracks live changes.
  */
 export function useCoarsePointer(): boolean {
-  const [coarse, setCoarse] = useState(false);
+  const [coarse, setCoarse] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(pointer: coarse)").matches,
+  );
   useEffect(() => {
     const mq = window.matchMedia("(pointer: coarse)");
     setCoarse(mq.matches);

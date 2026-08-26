@@ -24,11 +24,39 @@ import {
   type StageChip,
 } from "./stages";
 
+/**
+ * The wait between answering and running. The physics chunk is over a megabyte
+ * gzipped (rapier ships its WASM base64-inlined), and every control the course
+ * has — progress bar, objective, touch pad, "skip the course" — lives inside
+ * it. A null loading state leaves an empty stage for real seconds on a slow
+ * link, so the wait gets a designed screen instead. The stage identity is
+ * already on screen: BackLink and the stage dots render outside this tree.
+ */
+function CoursePreparing() {
+  return (
+    <div
+      role="status"
+      className="absolute inset-0 flex flex-col items-center justify-center gap-6 px-6 text-center"
+    >
+      <p className="text-[11px] uppercase tracking-[0.3em] text-[--color-fg-muted]">
+        preparing the course
+      </p>
+      <span className="relative block h-px w-56 overflow-hidden bg-[--color-border] md:w-72">
+        <span className="course-load-bar absolute inset-y-0 left-0 w-1/3 bg-[--stage-accent]" />
+      </span>
+      <p className="max-w-xs text-sm leading-relaxed text-[--color-fg-muted]">
+        Loading the physics engine. On a slow connection this takes a few
+        seconds.
+      </p>
+    </div>
+  );
+}
+
 // The question step is pure DOM. Keeping the physics and the SVG finale in
 // their own chunks lets it paint without waiting on three/rapier.
 const Platformer = dynamic(
   () => import("./Platformer").then((m) => m.Platformer),
-  { ssr: false, loading: () => null },
+  { ssr: false, loading: () => <CoursePreparing /> },
 );
 
 const RewardScene = dynamic(
@@ -130,9 +158,20 @@ export function PlayExperience() {
   }, []);
 
   // Warm the physics chunk while the question is on screen, so the run step
-  // starts instantly without blocking the first paint.
+  // starts instantly without blocking the first paint. Over a megabyte
+  // gzipped, so a metered or 2G connection opts out — it pays for the download
+  // only if the visitor actually answers. A rejected prefetch is swallowed:
+  // the real import on the run step surfaces the failure.
   useEffect(() => {
-    if (step === "question") void import("./Platformer");
+    if (step !== "question") return;
+    const connection = (
+      navigator as Navigator & {
+        connection?: { saveData?: boolean; effectiveType?: string };
+      }
+    ).connection;
+    if (connection?.saveData) return;
+    if (connection?.effectiveType?.includes("2g")) return;
+    void import("./Platformer").catch(() => {});
   }, [step]);
 
   // AnimatePresence swaps the focused element out from under the user; each

@@ -54,7 +54,15 @@ export function Question({ stage, onAnswer }: QuestionProps) {
             type="button"
             data-cursor="hover"
             onClick={() => onAnswer(chip)}
-            className="rounded-full border border-[--color-border] bg-[--color-bg-elevated]/60 px-5 py-2.5 text-sm text-[--color-fg] backdrop-blur-sm transition-colors duration-300 hover:border-[--stage-accent] hover:text-[--stage-accent]"
+            // The pill is 40px tall (14px text + 2 x 10px padding) and this is
+            // the primary control of the whole game — often the first thing a
+            // thumb reaches for. Growing the padding would inflate the pill and
+            // rewrap the row, so the hit area grows through a pseudo-element
+            // instead, the same trick BackLink uses: +4px on each edge takes
+            // the target to 48px while the pill keeps its drawn size. The row
+            // gap is 12px in both axes, so a neighbour's expanded target still
+            // clears this one by 4px and no tap can land on the wrong chip.
+            className="relative px-5 py-2.5 text-sm text-[--color-fg] after:absolute after:inset-x-0 after:-inset-y-1 after:content-[''] rounded-full border border-[--color-border] bg-[--color-bg-elevated]/60 backdrop-blur-sm transition-colors duration-300 hover:border-[--stage-accent] hover:text-[--stage-accent]"
             {...rise(16, 0.35 + i * 0.07, 0.55)}
             whileHover={reduce ? undefined : { y: -2 }}
             whileTap={{ scale: 0.97 }}
@@ -101,7 +109,13 @@ export function Question({ stage, onAnswer }: QuestionProps) {
           type="submit"
           data-cursor="hover"
           aria-label="Submit your answer"
-          className="shrink-0 rounded-full border border-[--color-border] px-4 py-2 text-sm text-[--color-fg-muted] transition-colors hover:border-[--stage-accent] hover:text-[--stage-accent]"
+          // 36px tall as drawn, and it sits in a 12px-gap flex row next to the
+          // text field — padding would push the field narrower and lift the
+          // arrow off the input's baseline. Same pseudo-element hit area as the
+          // chips, +6px per edge for a 48px target; the drawn width (32px of
+          // padding around the glyph) already clears 44px. The expansion is
+          // vertical only, so the input beside it keeps its own target intact.
+          className="relative shrink-0 px-4 py-2 text-sm text-[--color-fg-muted] after:absolute after:inset-x-0 after:-inset-y-1.5 after:content-[''] rounded-full border border-[--color-border] transition-colors hover:border-[--stage-accent] hover:text-[--stage-accent]"
         >
           →
         </button>

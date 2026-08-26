@@ -72,6 +72,40 @@
   }
 }
 
+/* Single source of the fallback lift duration, in milliseconds.
+   components/landing/IntroOverlay.tsx reads this property at mount to decide
+   whether the JS-free lift already played — if the two drift apart, hydration
+   drops an opaque curtain back over a revealed hero. */
+:root {
+  --intro-curtain-ms: 2300;
+}
+
 .intro-curtain-fallback {
-  animation: intro-curtain-lift 2.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: intro-curtain-lift calc(var(--intro-curtain-ms) * 1ms)
+    cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Indeterminate sweep for the /play course loader. The physics chunk is heavy
+   enough to be on screen for real seconds on a slow link, so the wait gets a
+   moving indicator rather than a static line. */
+@keyframes course-load-sweep {
+  0% {
+    transform: translateX(-110%);
+  }
+  100% {
+    transform: translateX(320%);
+  }
+}
+
+.course-load-bar {
+  animation: course-load-sweep 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Unlayered, so it wins over the Tailwind utilities on the same element. */
+@media (prefers-reduced-motion: reduce) {
+  .course-load-bar {
+    animation: none;
+    width: 100%;
+    opacity: 0.45;
+  }
 }

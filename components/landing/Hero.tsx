@@ -16,9 +16,14 @@ export function Hero() {
 
   return (
     <header className="relative mb-8 max-w-5xl text-center sm:mb-16">
+      {/* Nothing in the hero animates opacity: an element at opacity 0 is not
+          an LCP candidate, so fading the headline in pushes LCP past hydration
+          plus the full word stagger. Rising out of a blur reads the same and
+          the text is painted from the first frame. The intro curtain sitting
+          over it is occlusion, not transparency — LCP still counts it. */}
       <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
+        initial={reduce ? false : { filter: "blur(6px)" }}
+        animate={{ filter: "blur(0px)" }}
         transition={{ duration: 0.8, delay: 0.1 }}
         className="mb-4 text-[10px] uppercase tracking-[0.35em] text-[--color-fg-muted] sm:mb-5 sm:text-xs"
       >
@@ -31,12 +36,8 @@ export function Hero() {
           return (
             <motion.span
               key={`${word}-${i}`}
-              initial={
-                reduce
-                  ? { opacity: 0 }
-                  : { opacity: 0, y: 30, filter: "blur(10px)" }
-              }
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              initial={reduce ? false : { y: 30, filter: "blur(10px)" }}
+              animate={{ y: 0, filter: "blur(0px)" }}
               transition={{
                 duration: reduce ? 0.3 : 0.8,
                 delay: reduce ? 0 : 0.3 + i * 0.08,
@@ -55,8 +56,8 @@ export function Hero() {
       </h1>
 
       <motion.p
-        initial={reduce ? { opacity: 0 } : { opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={reduce ? false : { y: 12 }}
+        animate={{ y: 0 }}
         transition={{
           duration: reduce ? 0.3 : 0.6,
           delay: reduce ? 0 : sublineDelay,

@@ -12,6 +12,22 @@ const SESSION_KEY = "jn-intro-seen";
 const HOLD_MS = 1450;
 const HOLD_REDUCED_MS = 650;
 
+// Fallback if --intro-curtain-ms cannot be read.
+const CURTAIN_MS_FALLBACK = 2300;
+
+// The keyframe in globals.css holds the curtain opaque through its 70% stop,
+// then lifts. Past that point the hero is already being revealed.
+const LIFT_START_RATIO = 0.7;
+
+/** Duration of the JS-free lift, read from the CSS so the two cannot drift. */
+function curtainDurationMs(): number {
+  const raw = getComputedStyle(document.documentElement).getPropertyValue(
+    "--intro-curtain-ms",
+  );
+  const parsed = Number.parseFloat(raw);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : CURTAIN_MS_FALLBACK;
+}
+
 const WORDS = [
   { text: "Jawad", serif: false },
   { text: "Nisar", serif: true },
@@ -46,6 +62,28 @@ export function IntroOverlay() {
     } catch {
       // Non-fatal: the intro will simply replay on the next visit.
     }
+
+    // Hydration does not always land before the CSS fallback starts lifting.
+    // Taking the animation over at that point would drop an opaque curtain
+    // back onto a half-revealed hero and replay the name — so once the lift
+    // has begun, React defers to the keyframe instead of restarting it.
+    // performance.now() over-counts slightly (the animation starts at first
+    // paint, not at navigation), which errs toward deferring: the safe side.
+    const total = curtainDurationMs();
+    const elapsed = performance.now();
+
+    if (elapsed >= total) {
+      // The curtain is already gone. Drop it without an exit animation.
+      setSkip(true);
+      return;
+    }
+
+    if (elapsed >= total * LIFT_START_RATIO) {
+      // Mid-lift: let the keyframe finish, then unmount the hidden node.
+      const timer = window.setTimeout(() => setSkip(true), total - elapsed + 50);
+      return () => window.clearTimeout(timer);
+    }
+
     setPhase("play");
   }, []);
 

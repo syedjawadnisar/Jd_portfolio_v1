@@ -21,7 +21,18 @@ export function LandingExperience() {
   const years = useExperienceYears();
 
   return (
-    <main className="relative">
+    <main className="relative landing-tree">
+      {/* Without JS every reveal on this page stays at its `initial` state —
+          inline opacity 0, a translate, a blur — and the route paints as a bare
+          rectangle. This neutralises those inline values, scoped to the landing
+          tree: /cinematic parks its inactive chapters at opacity 0 and would
+          stack all of them if the same rule were global. Serialized inline
+          styles are the only thing matched, so class-driven transforms (the
+          contact game's card backs) keep theirs. */}
+      <noscript>
+        <style>{`.landing-tree [style*="opacity:0"],.landing-tree [style*="translate"],.landing-tree [style*="blur("]{opacity:1!important;transform:none!important;filter:none!important}`}</style>
+      </noscript>
+
       <IntroOverlay />
 
       {/* Single canvas for the whole route — silk + scroll-reactive particles. */}

@@ -11,6 +11,7 @@ import dynamic from "next/dynamic";
 import { AnimatePresence, motion } from "framer-motion";
 import { bio } from "@/data/bio";
 import { cn } from "@/lib/utils";
+import { detectWebGL } from "@/lib/webgl";
 import { EASE_OUT } from "@/lib/motion";
 import { BackLink } from "@/components/ui/BackLink";
 import { JourneyFooter } from "@/components/footer/JourneyFooter";
@@ -70,15 +71,6 @@ const RewardScene = dynamic(
  * stage 3. The only way back onto the course is "Play again" (full reset).
  */
 type Step = "question" | "run" | "checkpoint" | "finale";
-
-function detectWebGL(): boolean {
-  try {
-    const canvas = document.createElement("canvas");
-    return Boolean(canvas.getContext("webgl2") ?? canvas.getContext("webgl"));
-  } catch {
-    return false;
-  }
-}
 
 function WebGLFallback() {
   return (

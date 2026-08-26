@@ -216,7 +216,7 @@ export function SilkPlane({ variant = "calm" }: { variant?: SilkVariant }) {
   );
 }
 
-type SilkBackgroundProps = {
+export type SilkBackgroundProps = {
   variant?: SilkVariant;
   className?: string;
 };

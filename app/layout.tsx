@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Instrument_Serif } from "next/font/google";
 import { Cursor } from "@/components/ui/Cursor";
+import { siteUrl } from "@/lib/site";
 import "./globals.css";
 
 const inter = Inter({
@@ -20,11 +21,16 @@ const instrumentSerif = Instrument_Serif({
 });
 
 /**
- * Absolute base for OG/Twitter card URLs. Set NEXT_PUBLIC_SITE_URL to the
- * deployment origin (e.g. https://your-domain.com); the localhost fallback
- * keeps dev previews resolvable instead of pointing at a dead host.
+ * The browser chrome is part of the first frame: without a theme color, iOS
+ * Safari and Chrome on Android frame a near-black page in their default light
+ * UI. The hex matches --color-bg and the shader's BASE constant.
  */
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#0c0d18",
+  colorScheme: "dark",
+};
 
 export const metadata: Metadata = {
   title: "Jawad Nisar — Senior Full-Stack & AI Architect",

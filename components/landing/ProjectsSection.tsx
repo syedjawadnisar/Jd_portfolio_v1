@@ -143,6 +143,21 @@ function ProjectRow({
             </li>
           ))}
         </motion.ul>
+
+        {project.url && (
+          <motion.p variants={item} className="mt-6">
+            <a
+              href={project.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-cursor="hover"
+              className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[--color-border] px-5 text-sm text-[--color-fg-muted] transition-colors hover:border-[--color-accent] hover:text-[--color-accent]"
+            >
+              {new URL(project.url).hostname.replace(/^www\./, "")}
+              <span aria-hidden>↗</span>
+            </a>
+          </motion.p>
+        )}
       </motion.div>
     </motion.article>
   );

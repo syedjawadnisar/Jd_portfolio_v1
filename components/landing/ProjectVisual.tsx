@@ -23,7 +23,7 @@ function hash(input: string) {
 }
 
 /**
- * "CellCloud" -> "CC", "Toptal" -> "T", "CHIIRP" -> "C".
+ * "CellCloud" -> "CC", "Docuseal" -> "D", "CHIIRP" -> "C".
  * Two letters only when the name genuinely camel-cases; all-caps names keep one.
  */
 function monogram(name: string) {

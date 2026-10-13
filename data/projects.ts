@@ -9,13 +9,13 @@ export type Project = {
   role: string;
   stack: readonly string[];
   /**
-   * Path to a project still, relative to /public — e.g. "/images/projects/toptal.webp".
+   * Path to a project still, relative to /public, e.g. "/images/projects/cellcloud.webp".
    * Leave undefined until the file actually exists: ProjectVisual renders a
    * procedural fallback whenever this is missing, and next/image must never be
    * pointed at a file that is not on disk.
    *
    * Expected filenames (16:10, webp — see workspace/guides/image-assets.md):
-   *   toptal.webp · cellcloud.webp · moemate.webp · chiirp.webp · docuseal.webp
+   *   global-talent-marketplace.webp · cellcloud.webp · moemate.webp · chiirp.webp · docuseal.webp
    */
   image?: string;
   /** Required alongside `image`. Describe the frame, not the company. */
@@ -26,7 +26,7 @@ export type Project = {
 
 export const featuredProjects: readonly Project[] = [
   {
-    name: "Toptal",
+    name: "Global talent marketplace",
     domain: "FinTech / HR-SaaS",
     impact:
       "Engineered an end-to-end multi-currency billing approval flow and worker discount system.",

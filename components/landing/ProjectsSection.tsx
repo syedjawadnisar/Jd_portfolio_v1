@@ -11,7 +11,7 @@ import {
 } from "framer-motion";
 import { featuredProjects, projects, type Project } from "@/data/projects";
 import { numberWord } from "@/lib/experience";
-import { EASE_OUT } from "@/lib/motion";
+import { EASE_OUT, settled } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import { ProjectVisual } from "./ProjectVisual";
 
@@ -53,7 +53,7 @@ function ProjectRow({
   const item: Variants = reduceMotion
     ? {
         hidden: { opacity: 0 },
-        show: { opacity: 1, transition: { duration: 0.2 } },
+        show: settled(),
       }
     : {
         hidden: { opacity: 0, y: 26 },
@@ -63,7 +63,7 @@ function ProjectRow({
   const visual: Variants = reduceMotion
     ? {
         hidden: { opacity: 0 },
-        show: { opacity: 1, transition: { duration: 0.2 } },
+        show: settled(),
       }
     : {
         hidden: { opacity: 0, y: 40, scale: 0.97 },
@@ -86,7 +86,8 @@ function ProjectRow({
     >
       {/* Visual */}
       <motion.div
-        style={reduceMotion ? undefined : { y: visualY }}
+        // Always a motion value, so reduced motion settles the server's offset at 0.
+        style={{ y: reduceMotion ? 0 : visualY }}
         className={cn("lg:col-span-7", flipped ? "lg:order-2" : "lg:order-1")}
       >
         <motion.div variants={visual}>
@@ -102,7 +103,7 @@ function ProjectRow({
 
       {/* Content */}
       <motion.div
-        style={reduceMotion ? undefined : { y: contentY }}
+        style={{ y: reduceMotion ? 0 : contentY }}
         className={cn("lg:col-span-5", flipped ? "lg:order-1" : "lg:order-2")}
       >
         <motion.p

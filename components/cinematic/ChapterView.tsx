@@ -6,6 +6,7 @@ import { featuredProjects } from "@/data/projects";
 import { skillCategories } from "@/data/skills";
 import { YEARS_TOKEN, type Slide, type SlideItem } from "@/data/slides";
 import { numberWord } from "@/lib/experience";
+import { settled } from "@/lib/motion";
 import { useExperienceYears } from "@/lib/experience-client";
 import { cn } from "@/lib/utils";
 import { ScrollHint } from "@/components/ui/ScrollHint";
@@ -77,10 +78,11 @@ function SkillStream({
               }
               animate={
                 reduce
-                  ? {
+                  ? settled({
                       opacity: DEPTH_OPACITY[depth],
-                      transition: { duration: 0.5, delay: 0.2 },
-                    }
+                      duration: 0.5,
+                      delay: 0.2,
+                    })
                   : {
                       opacity: DEPTH_OPACITY[depth],
                       scale: 1,
@@ -142,7 +144,7 @@ function ProjectSweep({
                 }
                 animate={
                   reduce
-                    ? { opacity: 1, transition: { duration: 0.5, delay: 0.2 } }
+                    ? settled({ duration: 0.5, delay: 0.2 })
                     : {
                         opacity: 1,
                         x: 0,
@@ -164,7 +166,7 @@ function ProjectSweep({
               }
               animate={
                 reduce
-                  ? { opacity: 1, transition: { duration: 0.5, delay: 0.2 } }
+                  ? settled({ duration: 0.5, delay: 0.2 })
                   : {
                       opacity: 1,
                       x: 0,
@@ -189,7 +191,7 @@ function ProjectSweep({
               }
               animate={
                 reduce
-                  ? { opacity: 1, transition: { duration: 0.5, delay: 0.2 } }
+                  ? settled({ duration: 0.5, delay: 0.2 })
                   : {
                       opacity: 1,
                       x: 0,
@@ -274,7 +276,7 @@ export function ChapterView({
             initial={reduce ? { opacity: 0 } : { opacity: 0, y: 70 }}
             animate={
               reduce
-                ? { opacity: 1, transition: { duration: 0.6 } }
+                ? settled({ duration: 0.6 })
                 : {
                     opacity: 1,
                     y: 0,
@@ -298,7 +300,7 @@ export function ChapterView({
         }
         animate={
           reduce
-            ? { opacity: 1, transition: { duration: 0.5, delay: 0.1 } }
+            ? settled({ letterSpacing: "0.35em", duration: 0.5, delay: 0.1 })
             : {
                 opacity: 1,
                 letterSpacing: "0.35em",
@@ -345,7 +347,7 @@ export function ChapterView({
                 }
                 animate={
                   reduce
-                    ? { opacity: 1, transition: { duration: 0.5, delay: 0.2 } }
+                    ? settled({ duration: 0.5, delay: 0.2 })
                     : {
                         opacity: 1,
                         y: 0,
@@ -380,7 +382,7 @@ export function ChapterView({
               }
               animate={
                 reduce
-                  ? { opacity: 1, transition: { duration: 0.5, delay: 0.1 } }
+                  ? settled({ duration: 0.5, delay: 0.1 })
                   : {
                       opacity: 1,
                       y: 0,
@@ -439,7 +441,7 @@ export function ChapterView({
             }
             animate={
               reduce
-                ? { opacity: 1, transition: { duration: 0.5, delay: 0.3 } }
+                ? settled({ duration: 0.5, delay: 0.3 })
                 : {
                     opacity: 1,
                     y: 0,

@@ -1,5 +1,6 @@
 "use client";
 
+import type { TargetAndTransition } from "framer-motion";
 import { useEffect, useState } from "react";
 
 /**
@@ -66,4 +67,34 @@ export function useCoarsePointer(): boolean {
 /** Canvas dpr range — halved on coarse pointers so mobile keeps its frame rate. */
 export function canvasDpr(coarse: boolean): [number, number] {
   return coarse ? [1, 1.25] : [1, 1.75];
+}
+
+/**
+ * Reduced-motion target for an element whose full-motion `initial` moves,
+ * scales or blurs it. The server cannot know the visitor's motion setting,
+ * so it renders that full-motion `initial`. A reduced target that only fades
+ * opacity then leaves the offset or the blur exactly where the server put
+ * it, so this settles all of them at once and fades opacity only.
+ */
+export function settled({
+  opacity = 1,
+  duration = 0.2,
+  delay = 0,
+  ...final
+}: {
+  opacity?: number;
+  duration?: number;
+  delay?: number;
+  y?: number | string;
+  letterSpacing?: string;
+} = {}): TargetAndTransition {
+  return {
+    opacity,
+    x: 0,
+    y: 0,
+    scale: 1,
+    filter: "blur(0px)",
+    ...final,
+    transition: { duration: 0, opacity: { duration, delay } },
+  };
 }

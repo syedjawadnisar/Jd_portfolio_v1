@@ -3,7 +3,7 @@
 import { motion, useReducedMotion, type Variants } from "framer-motion";
 import { BackLink } from "@/components/ui/BackLink";
 import { earlierWork, projects, type Project } from "@/data/projects";
-import { EASE_OUT } from "@/lib/motion";
+import { EASE_OUT, settled } from "@/lib/motion";
 
 /** Cards carry fewer chips than the landing rows, because the grid is denser. */
 const CARD_STACK_LIMIT = 5;
@@ -14,7 +14,7 @@ function ProjectCard({ project, column }: { project: Project; column: number }) 
   const reduce = useReducedMotion();
 
   const reveal: Variants = reduce
-    ? { hidden: { opacity: 0 }, show: { opacity: 1, transition: { duration: 0.2 } } }
+    ? { hidden: { opacity: 0 }, show: settled() }
     : {
         hidden: { opacity: 0, y: 26 },
         show: {

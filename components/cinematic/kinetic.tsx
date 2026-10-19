@@ -8,7 +8,7 @@ import {
   type TargetAndTransition,
 } from "framer-motion";
 import type { SlideSegment } from "@/data/slides";
-import { EASE_OUT, EXIT_EASE } from "@/lib/motion";
+import { EASE_OUT, EXIT_EASE, settled } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 /** Signature ease — the site-wide curve, re-exported under the deck's name. */
@@ -76,7 +76,7 @@ export function KineticHeading({
           }
           animate={
             reduce
-              ? { opacity: 1, transition: { duration: 0.5, delay: 0.15 } }
+              ? settled({ y: "0em", duration: 0.5, delay: 0.15 })
               : {
                   opacity: 1,
                   y: "0em",
@@ -142,17 +142,23 @@ export function DriftLayer({
   style?: React.CSSProperties;
   children: React.ReactNode;
 }) {
-  if (reduce || (driftX === 0 && driftY === 0)) {
+  if (driftX === 0 && driftY === 0) {
     return (
       <div className={className} style={style}>
         {children}
       </div>
     );
   }
+  // Under reduced motion this stays a motion.div and snaps to rest. A plain
+  // div would hydrate over the server's drift offset and keep it for good.
   return (
     <motion.div
       initial={{ x: -driftX / 2, y: driftY / 2 }}
-      animate={{ x: driftX / 2, y: -driftY / 2 }}
+      animate={
+        reduce
+          ? { x: 0, y: 0, transition: { duration: 0 } }
+          : { x: driftX / 2, y: -driftY / 2 }
+      }
       transition={{ duration, ease: "linear" }}
       className={className}
       style={style}

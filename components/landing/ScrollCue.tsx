@@ -18,7 +18,7 @@ export function ScrollCue() {
         label={
           <>
             or keep scrolling —{" "}
-            <span className="text-[--color-accent-soft]">
+            <span className="text-(--color-accent-soft)">
               the whole story is below
             </span>
           </>

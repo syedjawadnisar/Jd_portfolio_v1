@@ -29,10 +29,10 @@ export function BackLink({
         // its own position class, which already establishes the containing
         // block the pseudo-element needs.
         "relative inline-flex items-center after:absolute after:-inset-x-3 after:-inset-y-4 after:content-['']",
-        "text-[11px] uppercase tracking-[0.3em] text-[--color-fg-muted] transition-colors",
+        "text-[11px] uppercase tracking-[0.3em] text-(--color-fg-muted) transition-colors",
         stageAccent
-          ? "hover:text-[--stage-accent]"
-          : "hover:text-[--color-accent]",
+          ? "hover:text-(--stage-accent)"
+          : "hover:text-(--color-accent)",
         className,
       )}
     >

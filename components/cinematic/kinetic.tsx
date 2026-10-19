@@ -106,7 +106,7 @@ export function KineticHeading({
           className={cn(
             "mr-[0.2em] inline-block will-change-transform",
             word.serif &&
-              "font-display italic font-normal text-[--color-accent-soft]",
+              "font-display italic font-normal text-(--color-accent-soft)",
           )}
         >
           {word.text}

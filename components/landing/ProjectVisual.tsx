@@ -107,7 +107,7 @@ export function ProjectVisual({
   const variant = hash(name) % 5;
 
   return (
-    <div className="group/visual relative aspect-[16/10] w-full overflow-hidden rounded-2xl border border-[--color-border] bg-[--color-bg-elevated] sm:rounded-3xl">
+    <div className="group/visual relative aspect-[16/10] w-full overflow-hidden rounded-2xl border border-(--color-border) bg-(--color-bg-elevated) sm:rounded-3xl">
       {image ? (
         <Image
           src={image}
@@ -163,14 +163,14 @@ export function ProjectVisual({
           </span>
 
           {/* Top sheen so the frame reads as glass, not a flat swatch. */}
-          <div className="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-[--color-fg]/[0.06] to-transparent" />
+          <div className="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-(--color-fg)/[0.06] to-transparent" />
         </div>
       )}
 
       {/* Inner hairline, shared by both states. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-[--color-fg]/[0.07] sm:rounded-3xl"
+        className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-(--color-fg)/[0.07] sm:rounded-3xl"
       />
     </div>
   );

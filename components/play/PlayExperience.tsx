@@ -39,13 +39,13 @@ function CoursePreparing() {
       role="status"
       className="absolute inset-0 flex flex-col items-center justify-center gap-6 px-6 text-center"
     >
-      <p className="text-[11px] uppercase tracking-[0.3em] text-[--color-fg-muted]">
+      <p className="text-[11px] uppercase tracking-[0.3em] text-(--color-fg-muted)">
         preparing the course
       </p>
-      <span className="relative block h-px w-56 overflow-hidden bg-[--color-border] md:w-72">
-        <span className="course-load-bar absolute inset-y-0 left-0 w-1/3 bg-[--stage-accent]" />
+      <span className="relative block h-px w-56 overflow-hidden bg-(--color-border) md:w-72">
+        <span className="course-load-bar absolute inset-y-0 left-0 w-1/3 bg-(--stage-accent)" />
       </span>
-      <p className="max-w-xs text-sm leading-relaxed text-[--color-fg-muted]">
+      <p className="max-w-xs text-sm leading-relaxed text-(--color-fg-muted)">
         Loading the physics engine. On a slow connection this takes a few
         seconds.
       </p>
@@ -75,21 +75,21 @@ type Step = "question" | "run" | "checkpoint" | "finale";
 function WebGLFallback() {
   return (
     <main className="flex min-h-[100svh] flex-col items-center justify-center px-6 py-24">
-      <div className="w-full max-w-lg rounded-2xl border border-[--color-border] bg-[--color-bg-elevated]/60 p-8 text-center backdrop-blur-sm md:p-10">
-        <p className="mb-4 text-xs uppercase tracking-[0.3em] text-[--color-fg-muted]">
+      <div className="w-full max-w-lg rounded-2xl border border-(--color-border) bg-(--color-bg-elevated)/60 p-8 text-center backdrop-blur-sm md:p-10">
+        <p className="mb-4 text-xs uppercase tracking-[0.3em] text-(--color-fg-muted)">
           The Interactive Journey
         </p>
         <h1 className="text-balance font-display text-3xl italic tracking-tight md:text-4xl">
           Your browser sat this game out.
         </h1>
-        <p className="mt-4 text-sm leading-relaxed text-[--color-fg-muted]">
+        <p className="mt-4 text-sm leading-relaxed text-(--color-fg-muted)">
           The platformer needs WebGL, and it didn&apos;t answer the call. No
           matter — the reward was always a conversation.
         </p>
         <a
           href={`mailto:${bio.contact.email}`}
           data-cursor="hover"
-          className="mt-8 inline-block rounded-full border border-[--color-accent] bg-[--color-accent]/10 px-8 py-3 text-sm font-medium uppercase tracking-[0.2em] text-[--color-accent] transition-colors hover:bg-[--color-accent]/20"
+          className="mt-8 inline-block rounded-full border border-(--color-accent) bg-(--color-accent)/10 px-8 py-3 text-sm font-medium uppercase tracking-[0.2em] text-(--color-accent) transition-colors hover:bg-(--color-accent)/20"
         >
           {bio.contact.email}
         </a>
@@ -109,7 +109,7 @@ function StageIndicator({ stageIndex, name }: { stageIndex: number; name: string
       </p>
       <p
         aria-hidden
-        className="hidden text-xs uppercase tracking-widest text-[--color-fg-muted] sm:block"
+        className="hidden text-xs uppercase tracking-widest text-(--color-fg-muted) sm:block"
       >
         stage {stageIndex + 1} of {stages.length} — {name}
       </p>
@@ -119,9 +119,9 @@ function StageIndicator({ stageIndex, name }: { stageIndex: number; name: string
             key={s.id}
             className={cn(
               "h-1 w-5 rounded-full transition-colors duration-500",
-              i < stageIndex && "bg-[--stage-accent]/45",
-              i === stageIndex && "bg-[--stage-accent]",
-              i > stageIndex && "bg-[--color-border]",
+              i < stageIndex && "bg-(--stage-accent)/45",
+              i === stageIndex && "bg-(--stage-accent)",
+              i > stageIndex && "bg-(--color-border)",
             )}
           />
         ))}

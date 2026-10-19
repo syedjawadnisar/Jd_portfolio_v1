@@ -107,12 +107,12 @@ function ProjectRow({
       >
         <motion.p
           variants={item}
-          className="flex items-center gap-3 text-[10px] uppercase tracking-[0.3em] text-[--color-fg-muted]"
+          className="flex items-center gap-3 text-[10px] uppercase tracking-[0.3em] text-(--color-fg-muted)"
         >
-          <span className="text-[--color-accent]">
+          <span className="text-(--color-accent)">
             {String(index + 1).padStart(2, "0")}
           </span>
-          <span aria-hidden className="h-px w-6 bg-[--color-border]" />
+          <span aria-hidden className="h-px w-6 bg-(--color-border)" />
           {project.domain}
         </motion.p>
 
@@ -125,14 +125,14 @@ function ProjectRow({
 
         <motion.p
           variants={item}
-          className="mt-5 text-base leading-relaxed text-[--color-fg-muted] md:text-lg"
+          className="mt-5 text-base leading-relaxed text-(--color-fg-muted) md:text-lg"
         >
           {project.impact}
         </motion.p>
 
         <motion.p
           variants={item}
-          className="mt-5 border-l-2 border-[--color-accent]/60 pl-4 text-sm leading-relaxed text-[--color-accent-soft]"
+          className="mt-5 border-l-2 border-(--color-accent)/60 pl-4 text-sm leading-relaxed text-(--color-accent-soft)"
         >
           {project.role}
         </motion.p>
@@ -141,13 +141,13 @@ function ProjectRow({
           {project.stack.slice(0, ROW_STACK_LIMIT).map((s) => (
             <li
               key={s}
-              className="rounded-full border border-[--color-border] bg-[--color-bg-elevated]/50 px-3 py-1 text-xs text-[--color-fg-muted] backdrop-blur-sm"
+              className="rounded-full border border-(--color-border) bg-(--color-bg-elevated)/50 px-3 py-1 text-xs text-(--color-fg-muted) backdrop-blur-sm"
             >
               {s}
             </li>
           ))}
           {project.stack.length > ROW_STACK_LIMIT && (
-            <li className="px-1 py-1 text-xs text-[--color-fg-muted]">
+            <li className="px-1 py-1 text-xs text-(--color-fg-muted)">
               +{project.stack.length - ROW_STACK_LIMIT} more
             </li>
           )}
@@ -160,7 +160,7 @@ function ProjectRow({
               target="_blank"
               rel="noopener noreferrer"
               data-cursor="hover"
-              className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[--color-border] px-5 text-sm text-[--color-fg-muted] transition-colors hover:border-[--color-accent] hover:text-[--color-accent]"
+              className="inline-flex min-h-11 items-center gap-2 rounded-full border border-(--color-border) px-5 text-sm text-(--color-fg-muted) transition-colors hover:border-(--color-accent) hover:text-(--color-accent)"
             >
               {new URL(project.url).hostname.replace(/^www\./, "")}
               <span aria-hidden>↗</span>
@@ -185,7 +185,7 @@ export function ProjectsSection() {
           transition={{ duration: reduceMotion ? 0.2 : 0.85, ease: EASE_OUT }}
           className="mb-16 text-center md:mb-24"
         >
-          <p className="mb-4 text-xs uppercase tracking-[0.3em] text-[--color-fg-muted]">
+          <p className="mb-4 text-xs uppercase tracking-[0.3em] text-(--color-fg-muted)">
             04 — Featured work
           </p>
           <h2 className="text-balance text-4xl font-semibold leading-[1.05] tracking-tight md:text-6xl">
@@ -211,14 +211,14 @@ export function ProjectsSection() {
           transition={{ duration: reduceMotion ? 0.2 : 0.7, ease: EASE_OUT }}
           className="mt-24 flex flex-col items-center gap-6 text-center md:mt-32"
         >
-          <p className="max-w-md text-base leading-relaxed text-[--color-fg-muted]">
+          <p className="max-w-md text-base leading-relaxed text-(--color-fg-muted)">
             {numberWord(projects.length - featuredProjects.length)} more
             projects, each with what was built and where.
           </p>
           <Link
             href="/projects"
             data-cursor="hover"
-            className="inline-flex min-h-11 items-center gap-3 rounded-full border border-[--color-accent] bg-[--color-accent]/10 px-8 py-3 text-sm font-medium uppercase tracking-[0.2em] text-[--color-accent] transition-colors hover:bg-[--color-accent]/20"
+            className="inline-flex min-h-11 items-center gap-3 rounded-full border border-(--color-accent) bg-(--color-accent)/10 px-8 py-3 text-sm font-medium uppercase tracking-[0.2em] text-(--color-accent) transition-colors hover:bg-(--color-accent)/20"
           >
             See all {projects.length} projects
             <span aria-hidden>→</span>

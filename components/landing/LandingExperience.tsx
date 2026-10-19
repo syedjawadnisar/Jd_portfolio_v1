@@ -57,7 +57,7 @@ export function LandingExperience() {
         label="01 — Who"
         title={`Lahore. ${numberWord(years)} years deep. Lead-tier scope.`}
       >
-        <p className="mx-auto max-w-2xl text-balance text-lg leading-relaxed text-[--color-fg-muted]">
+        <p className="mx-auto max-w-2xl text-balance text-lg leading-relaxed text-(--color-fg-muted)">
           I&apos;ve been shipping production systems since 2021 — billing flows that
           move money across borders, AI agents that hold conversations, data pipelines
           that don&apos;t flinch under load. Currently running four projects at once
@@ -70,7 +70,7 @@ export function LandingExperience() {
         label="02 — The superpower"
         title="I don't just use AI. I architect with it."
       >
-        <div className="mx-auto max-w-2xl space-y-6 text-lg leading-relaxed text-[--color-fg-muted]">
+        <div className="mx-auto max-w-2xl space-y-6 text-lg leading-relaxed text-(--color-fg-muted)">
           <p>
             Two years ago, AI was a tool I reached for to solve discrete problems.
           </p>
@@ -79,7 +79,7 @@ export function LandingExperience() {
             error-handling that diagnoses itself, pipelines that route around their
             own failures, agents that turn fuzzy intent into reliable side effects.
           </p>
-          <p className="text-[--color-fg]">
+          <p className="text-(--color-fg)">
             The systems I ship are smarter on their worst day than yesterday&apos;s
             were on their best.
           </p>
@@ -99,12 +99,12 @@ export function LandingExperience() {
                 delay: reduce ? 0 : i * 0.08,
                 ease: EASE_OUT,
               }}
-              className="rounded-2xl border border-[--color-border] bg-[--color-bg-elevated]/50 p-6 backdrop-blur-sm"
+              className="rounded-2xl border border-(--color-border) bg-(--color-bg-elevated)/50 p-6 backdrop-blur-sm"
             >
-              <p className="mb-4 text-xs uppercase tracking-[0.25em] text-[--color-accent]">
+              <p className="mb-4 text-xs uppercase tracking-[0.25em] text-(--color-accent)">
                 {cat.label}
               </p>
-              <ul className="space-y-1.5 text-sm text-[--color-fg]">
+              <ul className="space-y-1.5 text-sm text-(--color-fg)">
                 {cat.items.map((item) => (
                   <li key={item}>{item}</li>
                 ))}
@@ -120,7 +120,7 @@ export function LandingExperience() {
         label="05 — Workflow"
         title="Workflows that ship — not slides about workflows."
       >
-        <p className="mx-auto max-w-2xl text-balance text-lg leading-relaxed text-[--color-fg-muted]">
+        <p className="mx-auto max-w-2xl text-balance text-lg leading-relaxed text-(--color-fg-muted)">
           Jira, Asana, Zendesk, GitHub Actions — pick the cadence, I&apos;ll run it.
           Sprints that move. Retros that change behavior. Dashboards that tell
           the truth. The methodology matters less than the rhythm I bring to it.

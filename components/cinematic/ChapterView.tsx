@@ -96,7 +96,7 @@ function SkillStream({
               className={cn(
                 "block whitespace-nowrap",
                 word.accent
-                  ? "text-[10px] uppercase tracking-[0.35em] text-[--color-accent]"
+                  ? "text-[10px] uppercase tracking-[0.35em] text-(--color-accent)"
                   : DEPTH_SIZE[depth],
               )}
             >
@@ -151,7 +151,7 @@ function ProjectSweep({
                       }
                 }
                 exit={exitUp(reduce, i)}
-                className="text-[10px] uppercase tracking-[0.3em] text-[--color-accent]"
+                className="text-[10px] uppercase tracking-[0.3em] text-(--color-accent)"
               >
                 {item.meta}
               </motion.p>
@@ -202,7 +202,7 @@ function ProjectSweep({
                     }
               }
               exit={exitUp(reduce, i + 1)}
-              className="mt-1.5 max-w-2xl text-sm leading-relaxed text-[--color-fg-muted] md:text-base"
+              className="mt-1.5 max-w-2xl text-sm leading-relaxed text-(--color-fg-muted) md:text-base"
             >
               {item.detail}
             </motion.p>
@@ -282,7 +282,7 @@ export function ChapterView({
                   }
             }
             exit={exitUp(reduce, 2)}
-            className="block font-display italic leading-none text-[--color-fg]/[0.05] text-[36vw] md:text-[22vw]"
+            className="block font-display italic leading-none text-(--color-fg)/[0.05] text-[36vw] md:text-[22vw]"
           >
             {numeral}
           </motion.span>
@@ -307,7 +307,7 @@ export function ChapterView({
               }
         }
         exit={exitUp(reduce, 0)}
-        className="mb-6 text-[11px] uppercase text-[--color-fg-muted]"
+        className="mb-6 text-[11px] uppercase text-(--color-fg-muted)"
       >
         {slide.kicker}
       </motion.p>
@@ -358,7 +358,7 @@ export function ChapterView({
                       }
                 }
                 exit={exitUp(reduce, i + 1)}
-                className="text-balance text-base leading-relaxed text-[--color-fg-muted] md:text-lg"
+                className="text-balance text-base leading-relaxed text-(--color-fg-muted) md:text-lg"
               >
                 {line}
               </motion.p>
@@ -401,9 +401,9 @@ export function ChapterView({
                   delay={1.25 + i * 0.16}
                   reduce={reduce}
                 />
-                <span className="text-[--color-accent]">+</span>
+                <span className="text-(--color-accent)">+</span>
               </p>
-              <p className="mt-2.5 text-[10px] uppercase tracking-[0.3em] text-[--color-fg-muted]">
+              <p className="mt-2.5 text-[10px] uppercase tracking-[0.3em] text-(--color-fg-muted)">
                 {stat.label}
               </p>
             </motion.div>
@@ -449,7 +449,7 @@ export function ChapterView({
                   }
             }
             exit={exitUp(reduce, 2)}
-            className="pointer-events-auto mt-10 inline-block rounded-full border border-[--color-accent]/70 bg-[--color-accent]/10 px-9 py-3.5 text-sm font-medium uppercase tracking-[0.2em] text-[--color-accent] transition-colors hover:bg-[--color-accent]/20"
+            className="pointer-events-auto mt-10 inline-block rounded-full border border-(--color-accent)/70 bg-(--color-accent)/10 px-9 py-3.5 text-sm font-medium uppercase tracking-[0.2em] text-(--color-accent) transition-colors hover:bg-(--color-accent)/20"
           >
             {bio.contact.email}
           </motion.a>

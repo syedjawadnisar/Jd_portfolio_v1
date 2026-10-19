@@ -26,7 +26,7 @@ export function StageCheckpoint({
   return (
     <div className="flex min-h-[100svh] flex-col items-center justify-center px-6 py-24 text-center">
       <motion.div
-        className="w-full max-w-xl rounded-2xl border border-[--color-border] bg-[--color-bg-elevated]/60 px-8 py-10 backdrop-blur-sm md:px-12"
+        className="w-full max-w-xl rounded-2xl border border-(--color-border) bg-(--color-bg-elevated)/60 px-8 py-10 backdrop-blur-sm md:px-12"
         initial={
           reduce ? { opacity: 0 } : { opacity: 0, y: 24, scale: 0.98 }
         }
@@ -34,7 +34,7 @@ export function StageCheckpoint({
         transition={{ duration: reduce ? 0.3 : 0.6, ease: EASE_OUT }}
       >
         <motion.h1
-          className="text-xs uppercase tracking-[0.3em] text-[--stage-accent]"
+          className="text-xs uppercase tracking-[0.3em] text-(--stage-accent)"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: reduce ? 0 : 0.15, duration: 0.5 }}
@@ -56,7 +56,7 @@ export function StageCheckpoint({
         </motion.p>
 
         <motion.p
-          className="mt-6 text-[11px] uppercase tracking-[0.25em] text-[--color-fg-muted]"
+          className="mt-6 text-[11px] uppercase tracking-[0.25em] text-(--color-fg-muted)"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: reduce ? 0 : 0.45, duration: 0.5 }}
@@ -68,7 +68,7 @@ export function StageCheckpoint({
           type="button"
           onClick={onNext}
           data-cursor="hover"
-          className="mt-8 rounded-full border border-[--stage-accent] bg-[--stage-accent]/10 px-8 py-3 text-xs font-medium uppercase tracking-[0.2em] text-[--stage-accent] transition-colors hover:bg-[--stage-accent]/20"
+          className="mt-8 rounded-full border border-(--stage-accent) bg-(--stage-accent)/10 px-8 py-3 text-xs font-medium uppercase tracking-[0.2em] text-(--stage-accent) transition-colors hover:bg-(--stage-accent)/20"
           initial={reduce ? { opacity: 0 } : { opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{

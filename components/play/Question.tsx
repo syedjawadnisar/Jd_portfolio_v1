@@ -34,7 +34,7 @@ export function Question({ stage, onAnswer }: QuestionProps) {
   return (
     <div className="flex min-h-[100svh] flex-col items-center justify-center px-6 py-24 text-center">
       <motion.p
-        className="mb-5 text-xs uppercase tracking-[0.3em] text-[--color-fg-muted]"
+        className="mb-5 text-xs uppercase tracking-[0.3em] text-(--color-fg-muted)"
         {...rise(16, 0, 0.6)}
       >
         {stage.eyebrow}
@@ -62,7 +62,7 @@ export function Question({ stage, onAnswer }: QuestionProps) {
             // the target to 48px while the pill keeps its drawn size. The row
             // gap is 12px in both axes, so a neighbour's expanded target still
             // clears this one by 4px and no tap can land on the wrong chip.
-            className="relative px-5 py-2.5 text-sm text-[--color-fg] after:absolute after:inset-x-0 after:-inset-y-1 after:content-[''] rounded-full border border-[--color-border] bg-[--color-bg-elevated]/60 backdrop-blur-sm transition-colors duration-300 hover:border-[--stage-accent] hover:text-[--stage-accent]"
+            className="relative px-5 py-2.5 text-sm text-(--color-fg) after:absolute after:inset-x-0 after:-inset-y-1 after:content-[''] rounded-full border border-(--color-border) bg-(--color-bg-elevated)/60 backdrop-blur-sm transition-colors duration-300 hover:border-(--stage-accent) hover:text-(--stage-accent)"
             {...rise(16, 0.35 + i * 0.07, 0.55)}
             whileHover={reduce ? undefined : { y: -2 }}
             whileTap={{ scale: 0.97 }}
@@ -73,7 +73,7 @@ export function Question({ stage, onAnswer }: QuestionProps) {
       </div>
 
       <motion.p
-        className="mt-14 text-[11px] uppercase tracking-[0.25em] text-[--color-fg-muted]"
+        className="mt-14 text-[11px] uppercase tracking-[0.25em] text-(--color-fg-muted)"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: reduce ? 0 : 0.8, duration: reduce ? 0.3 : 0.7 }}
@@ -103,7 +103,7 @@ export function Question({ stage, onAnswer }: QuestionProps) {
           placeholder={stage.placeholder}
           data-cursor="hover"
           autoComplete="off"
-          className="w-full border-b border-[--color-border] bg-transparent px-1 py-2.5 text-center text-sm text-[--color-fg] outline-none transition-colors placeholder:text-[--color-fg-muted] focus:border-[--stage-accent]"
+          className="w-full border-b border-(--color-border) bg-transparent px-1 py-2.5 text-center text-sm text-(--color-fg) outline-none transition-colors placeholder:text-(--color-fg-muted) focus:border-(--stage-accent)"
         />
         <button
           type="submit"
@@ -115,7 +115,7 @@ export function Question({ stage, onAnswer }: QuestionProps) {
           // chips, +6px per edge for a 48px target; the drawn width (32px of
           // padding around the glyph) already clears 44px. The expansion is
           // vertical only, so the input beside it keeps its own target intact.
-          className="relative shrink-0 px-4 py-2 text-sm text-[--color-fg-muted] after:absolute after:inset-x-0 after:-inset-y-1.5 after:content-[''] rounded-full border border-[--color-border] transition-colors hover:border-[--stage-accent] hover:text-[--stage-accent]"
+          className="relative shrink-0 px-4 py-2 text-sm text-(--color-fg-muted) after:absolute after:inset-x-0 after:-inset-y-1.5 after:content-[''] rounded-full border border-(--color-border) transition-colors hover:border-(--stage-accent) hover:text-(--stage-accent)"
         >
           →
         </button>

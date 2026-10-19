@@ -25,7 +25,7 @@ export function Hero() {
         initial={reduce ? false : { filter: "blur(6px)" }}
         animate={{ filter: "blur(0px)" }}
         transition={{ duration: 0.8, delay: 0.1 }}
-        className="mb-4 text-[10px] uppercase tracking-[0.35em] text-[--color-fg-muted] sm:mb-5 sm:text-xs"
+        className="mb-4 text-[10px] uppercase tracking-[0.35em] text-(--color-fg-muted) sm:mb-5 sm:text-xs"
       >
         {bio.name} — {bio.location}
       </motion.p>
@@ -46,7 +46,7 @@ export function Hero() {
               className={cn(
                 "mr-[0.18em] inline-block",
                 isSerif &&
-                  "font-display italic font-normal text-[--color-accent-soft]",
+                  "font-display italic font-normal text-(--color-accent-soft)",
               )}
             >
               {word}
@@ -63,7 +63,7 @@ export function Hero() {
           delay: reduce ? 0 : sublineDelay,
           ease: EASE_OUT,
         }}
-        className="mt-5 text-balance text-sm text-[--color-fg-muted] sm:mt-8 sm:text-base md:text-lg"
+        className="mt-5 text-balance text-sm text-(--color-fg-muted) sm:mt-8 sm:text-base md:text-lg"
       >
         {bio.subline}
       </motion.p>

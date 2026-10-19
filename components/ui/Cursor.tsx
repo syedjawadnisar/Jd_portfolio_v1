@@ -102,7 +102,7 @@ export function Cursor() {
         style={{ x: ringX, y: ringY }}
       >
         <motion.div
-          className="rounded-full border border-[--color-accent]"
+          className="rounded-full border border-(--color-accent)"
           animate={{
             width: ringSize,
             height: ringSize,
@@ -117,7 +117,7 @@ export function Cursor() {
       {/* Inner dot — exact mouse position, no lag */}
       <motion.div
         aria-hidden
-        className={`pointer-events-none fixed left-0 top-0 ${CURSOR_LAYER} h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[--color-accent] mix-blend-screen`}
+        className={`pointer-events-none fixed left-0 top-0 ${CURSOR_LAYER} h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-(--color-accent) mix-blend-screen`}
         style={{ x: mouseX, y: mouseY }}
         animate={{ scale: dotScale }}
         transition={{ type: "spring", damping: 24, stiffness: 380 }}

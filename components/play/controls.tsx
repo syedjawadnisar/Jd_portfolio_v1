@@ -60,7 +60,7 @@ function HoldButton({
       onKeyUp={keyRelease}
       onBlur={release}
       onContextMenu={(e) => e.preventDefault()}
-      className="flex h-16 w-16 touch-none select-none items-center justify-center rounded-full border border-[--color-border] bg-[--color-bg-elevated]/70 text-[--color-fg] backdrop-blur-sm transition-colors active:border-[--color-accent] active:bg-[--color-accent]/15 active:text-[--color-accent]"
+      className="flex h-16 w-16 touch-none select-none items-center justify-center rounded-full border border-(--color-border) bg-(--color-bg-elevated)/70 text-(--color-fg) backdrop-blur-sm transition-colors active:border-(--color-accent) active:bg-(--color-accent)/15 active:text-(--color-accent)"
     >
       {children}
     </button>

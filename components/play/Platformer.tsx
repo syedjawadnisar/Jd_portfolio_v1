@@ -91,7 +91,7 @@ function RespawnFlash({ ref }: { ref: Ref<RespawnFlashHandle> }) {
       {flash > 0 && (
         <motion.div
           key={flash}
-          className="pointer-events-none absolute inset-0 z-30 bg-[--color-bg]"
+          className="pointer-events-none absolute inset-0 z-30 bg-(--color-bg)"
           initial={{ opacity: 0.85 }}
           animate={{ opacity: 0 }}
           exit={{ opacity: 0 }}
@@ -207,7 +207,7 @@ export function Platformer({ stage, onFinish, onContextLost }: PlatformerProps) 
         // unpadded 13px-tall text targets stacked on a touch game screen —
         // and missing "skip" to hit "home" loses the run. The pseudo-element
         // gives it a 44px+ hit area without moving the label.
-        className="absolute right-6 top-16 z-20 text-[11px] uppercase tracking-[0.3em] text-[--color-fg-muted] underline decoration-[--color-border] underline-offset-4 transition-colors after:absolute after:-inset-x-3 after:-inset-y-4 after:content-[''] hover:text-[--stage-accent] hover:decoration-[--stage-accent]"
+        className="absolute right-6 top-16 z-20 text-[11px] uppercase tracking-[0.3em] text-(--color-fg-muted) underline decoration-(--color-border) underline-offset-4 transition-colors after:absolute after:-inset-x-3 after:-inset-y-4 after:content-[''] hover:text-(--stage-accent) hover:decoration-(--stage-accent)"
       >
         skip the course
       </button>
@@ -223,7 +223,7 @@ export function Platformer({ stage, onFinish, onContextLost }: PlatformerProps) 
           {stage.course.title}
         </motion.h1>
         <motion.p
-          className="mt-2 text-xs uppercase tracking-[0.25em] text-[--color-fg-muted]"
+          className="mt-2 text-xs uppercase tracking-[0.25em] text-(--color-fg-muted)"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5, duration: 0.7 }}
@@ -237,7 +237,7 @@ export function Platformer({ stage, onFinish, onContextLost }: PlatformerProps) 
       {/* Keys hint for keyboard users */}
       {finePointer && (
         <motion.p
-          className="pointer-events-none absolute inset-x-0 bottom-14 z-10 text-center text-[11px] uppercase tracking-[0.25em] text-[--color-fg-muted]/80"
+          className="pointer-events-none absolute inset-x-0 bottom-14 z-10 text-center text-[11px] uppercase tracking-[0.25em] text-(--color-fg-muted)/80"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.7, duration: 0.7 }}
@@ -249,14 +249,14 @@ export function Platformer({ stage, onFinish, onContextLost }: PlatformerProps) 
       {/* Progress bar — start marker to flag */}
       <div className="pointer-events-none absolute inset-x-0 bottom-6 z-10 px-6">
         <div className="mx-auto flex w-full max-w-2xl items-center gap-3">
-          <span className="h-2 w-2 shrink-0 rounded-full bg-[--color-fg-muted]" />
-          <div className="relative h-1 flex-1 overflow-hidden rounded-full bg-[--color-border]">
+          <span className="h-2 w-2 shrink-0 rounded-full bg-(--color-fg-muted)" />
+          <div className="relative h-1 flex-1 overflow-hidden rounded-full bg-(--color-border)">
             <motion.div
-              className="absolute inset-y-0 left-0 w-full origin-left rounded-full bg-[--stage-accent]"
+              className="absolute inset-y-0 left-0 w-full origin-left rounded-full bg-(--stage-accent)"
               style={{ scaleX: progress }}
             />
           </div>
-          <span className="shrink-0 text-[--stage-accent]">
+          <span className="shrink-0 text-(--stage-accent)">
             <FlagIcon />
           </span>
         </div>

@@ -222,7 +222,7 @@ export function CinematicExperience() {
       <BackLink className="fixed left-6 top-6 z-50" />
       <p
         aria-hidden
-        className="fixed right-6 top-6 z-50 hidden text-[11px] uppercase tracking-[0.3em] text-[--color-fg-muted] md:block"
+        className="fixed right-6 top-6 z-50 hidden text-[11px] uppercase tracking-[0.3em] text-(--color-fg-muted) md:block"
       >
         esc to exit
       </p>
@@ -233,14 +233,14 @@ export function CinematicExperience() {
         aria-label="Previous chapter"
         data-cursor="hover"
         onClick={() => goTo(index - 1)}
-        className="absolute inset-y-0 left-0 z-10 w-1/2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[--color-accent]"
+        className="absolute inset-y-0 left-0 z-10 w-1/2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-(--color-accent)"
       />
       <button
         type="button"
         aria-label="Next chapter"
         data-cursor="hover"
         onClick={() => goTo(index + 1)}
-        className="absolute inset-y-0 right-0 z-10 w-1/2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[--color-accent]"
+        className="absolute inset-y-0 right-0 z-10 w-1/2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-(--color-accent)"
       />
 
       {/* Chapter layer — pointer-events pass through to the click zones;
@@ -267,14 +267,14 @@ export function CinematicExperience() {
             {slides.map((s, i) => (
               <div
                 key={s.id}
-                className="h-[2px] flex-1 overflow-hidden rounded-full bg-[--color-fg]/10"
+                className="h-[2px] flex-1 overflow-hidden rounded-full bg-(--color-fg)/10"
               >
                 {i < index && (
-                  <span className="block h-full w-full bg-[--color-accent]/80" />
+                  <span className="block h-full w-full bg-(--color-accent)/80" />
                 )}
                 {i === index && (
                   <motion.span
-                    className="block h-full w-full bg-[--color-accent]/80"
+                    className="block h-full w-full bg-(--color-accent)/80"
                     style={{ scaleX: segmentProgress, transformOrigin: "left" }}
                   />
                 )}
@@ -282,7 +282,7 @@ export function CinematicExperience() {
             ))}
           </div>
 
-          <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.28em] text-[--color-fg-muted]">
+          <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.28em] text-(--color-fg-muted)">
             {/* Once the run is over `running` can never return, so the
                 pause switch becomes a replay. */}
             <button
@@ -296,7 +296,7 @@ export function CinematicExperience() {
                     ? "Resume autoplay"
                     : "Pause autoplay"
               }
-              className="flex items-center gap-2.5 uppercase tracking-[0.28em] transition-colors hover:text-[--color-accent]"
+              className="flex items-center gap-2.5 uppercase tracking-[0.28em] transition-colors hover:text-(--color-accent)"
             >
               <svg
                 viewBox="0 0 12 12"

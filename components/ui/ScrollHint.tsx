@@ -22,7 +22,7 @@ export function ScrollHint({
 }) {
   return (
     <div className={cn("flex flex-col items-center", className)}>
-      <p className="text-center text-[11px] uppercase tracking-[0.3em] text-[--color-fg-muted]">
+      <p className="text-center text-[11px] uppercase tracking-[0.3em] text-(--color-fg-muted)">
         {label}
       </p>
       <motion.span
@@ -30,8 +30,8 @@ export function ScrollHint({
         className={cn(
           "mt-4 block h-9 w-px bg-gradient-to-b to-transparent sm:h-12",
           tone === "accent"
-            ? "from-[--color-accent]/70"
-            : "from-[--color-fg-muted]",
+            ? "from-(--color-accent)/70"
+            : "from-(--color-fg-muted)",
         )}
         style={{ transformOrigin: "top" }}
         animate={

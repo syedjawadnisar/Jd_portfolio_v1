@@ -124,7 +124,7 @@ export function IntroOverlay() {
                 }
           }
           className={cn(
-            "fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[--color-bg]",
+            "fixed inset-0 z-[100] flex flex-col items-center justify-center bg-(--color-bg)",
             // "boot" is the prerendered / pre-hydration state. The CSS
             // keyframe lifts the curtain on its own if React never takes
             // over; React drops the class on mount so it cannot fight the
@@ -136,7 +136,7 @@ export function IntroOverlay() {
             <style>{`.intro-curtain-fallback { display: none; }`}</style>
           </noscript>
 
-          <p className="text-5xl font-semibold tracking-tight text-[--color-fg] md:text-7xl">
+          <p className="text-5xl font-semibold tracking-tight text-(--color-fg) md:text-7xl">
             {WORDS.map((word, w) => (
               <span
                 key={word.text}
@@ -144,7 +144,7 @@ export function IntroOverlay() {
                   "inline-block whitespace-nowrap",
                   w > 0 && "ml-[0.28em]",
                   word.serif &&
-                    "font-display italic font-normal text-[--color-accent-soft]",
+                    "font-display italic font-normal text-(--color-accent-soft)",
                 )}
               >
                 {word.text.split("").map((ch, i) => {
@@ -173,9 +173,9 @@ export function IntroOverlay() {
             ))}
           </p>
 
-          <span className="relative mt-10 block h-px w-56 overflow-hidden bg-[--color-border] md:w-72">
+          <span className="relative mt-10 block h-px w-56 overflow-hidden bg-(--color-border) md:w-72">
             <motion.span
-              className="absolute inset-0 origin-left bg-[--color-accent]"
+              className="absolute inset-0 origin-left bg-(--color-accent)"
               initial={{ scaleX: 0 }}
               animate={playing ? { scaleX: 1 } : undefined}
               transition={

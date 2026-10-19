@@ -201,7 +201,7 @@ export function JourneyFooter() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true, amount: 0.5 }}
           transition={{ duration: reduce ? 0 : 0.8, ease: EASE_OUT }}
-          className="mb-4 text-xs uppercase tracking-[0.3em] text-[--color-fg-muted]"
+          className="mb-4 text-xs uppercase tracking-[0.3em] text-(--color-fg-muted)"
         >
           Your move
         </motion.p>
@@ -223,7 +223,7 @@ export function JourneyFooter() {
               className={cn(
                 "mr-[0.22em] inline-block",
                 SERIF_INDICES.has(i) &&
-                  "font-display italic font-normal text-[--color-accent-soft]",
+                  "font-display italic font-normal text-(--color-accent-soft)",
               )}
             >
               {word}
@@ -240,7 +240,7 @@ export function JourneyFooter() {
             delay: reduce ? 0 : 0.5,
             ease: EASE_OUT,
           }}
-          className="mx-auto mt-6 max-w-xl text-balance text-base text-[--color-fg-muted] md:text-lg"
+          className="mx-auto mt-6 max-w-xl text-balance text-base text-(--color-fg-muted) md:text-lg"
         >
           Four pairs hide four ways to reach me. Match them — or skip straight
           to the handshake.
@@ -258,7 +258,7 @@ export function JourneyFooter() {
           }}
           className="mt-14 w-full max-w-[26rem] md:max-w-[30rem]"
         >
-          <div className="mb-5 flex items-center justify-between text-[10px] uppercase tracking-[0.3em] text-[--color-fg-muted]">
+          <div className="mb-5 flex items-center justify-between text-[10px] uppercase tracking-[0.3em] text-(--color-fg-muted)">
             <span>Match a pair — unlock a channel</span>
             <span>{revealed.length} / 4</span>
           </div>
@@ -303,20 +303,20 @@ export function JourneyFooter() {
                     {/* Back */}
                     <span
                       className={cn(
-                        "absolute inset-0 flex items-center justify-center rounded-xl border border-[--color-border] bg-[--color-bg-elevated]/60 backdrop-blur-sm transition-colors duration-300 [backface-visibility:hidden]",
-                        !isUp && "group-hover:border-[--color-accent]/60",
+                        "absolute inset-0 flex items-center justify-center rounded-xl border border-(--color-border) bg-(--color-bg-elevated)/60 backdrop-blur-sm transition-colors duration-300 [backface-visibility:hidden]",
+                        !isUp && "group-hover:border-(--color-accent)/60",
                       )}
                     >
-                      <BackMark className="h-4 w-4 text-[--color-fg-muted]/60" />
+                      <BackMark className="h-4 w-4 text-(--color-fg-muted)/60" />
                     </span>
 
                     {/* Face */}
                     <span
                       className={cn(
-                        "absolute inset-0 flex items-center justify-center rounded-xl border bg-[--color-bg-elevated] [backface-visibility:hidden] [transform:rotateY(180deg)]",
+                        "absolute inset-0 flex items-center justify-center rounded-xl border bg-(--color-bg-elevated) [backface-visibility:hidden] [transform:rotateY(180deg)]",
                         isMatched
-                          ? "border-[--color-accent]/70 text-[--color-accent]"
-                          : "border-[--color-border] text-[--color-fg]",
+                          ? "border-(--color-accent)/70 text-(--color-accent)"
+                          : "border-(--color-border) text-(--color-fg)",
                       )}
                     >
                       {card && (
@@ -357,13 +357,13 @@ export function JourneyFooter() {
                 }}
                 className="flex flex-col items-center"
               >
-                <p className="text-xs uppercase tracking-[0.3em] text-[--color-accent]">
+                <p className="text-xs uppercase tracking-[0.3em] text-(--color-accent)">
                   {skipped
                     ? "No games — straight to it"
                     : "Four for four — sharp eyes"}
                 </p>
 
-                <p className="mx-auto mt-4 max-w-xl text-balance text-base text-[--color-fg-muted] md:text-lg">
+                <p className="mx-auto mt-4 max-w-xl text-balance text-base text-(--color-fg-muted) md:text-lg">
                   Tell me what you&apos;re trying to build. I&apos;ll tell you
                   whether I&apos;m the one to ship it.
                 </p>
@@ -377,7 +377,7 @@ export function JourneyFooter() {
                     }
                   }}
                   data-cursor="hover"
-                  className="mt-8 rounded-full border border-[--color-accent] bg-[--color-accent]/10 px-8 py-3 text-sm font-medium uppercase tracking-[0.2em] text-[--color-accent] transition-colors hover:bg-[--color-accent]/20"
+                  className="mt-8 rounded-full border border-(--color-accent) bg-(--color-accent)/10 px-8 py-3 text-sm font-medium uppercase tracking-[0.2em] text-(--color-accent) transition-colors hover:bg-(--color-accent)/20"
                 >
                   {bio.contact.email}
                 </a>
@@ -388,7 +388,7 @@ export function JourneyFooter() {
                     target="_blank"
                     rel="noopener noreferrer"
                     data-cursor="hover"
-                    className="rounded-full border border-[--color-border] px-5 py-2 text-sm text-[--color-fg-muted] transition-colors hover:border-[--color-accent] hover:text-[--color-accent]"
+                    className="rounded-full border border-(--color-border) px-5 py-2 text-sm text-(--color-fg-muted) transition-colors hover:border-(--color-accent) hover:text-(--color-accent)"
                   >
                     LinkedIn
                   </a>
@@ -397,14 +397,14 @@ export function JourneyFooter() {
                     target="_blank"
                     rel="noopener noreferrer"
                     data-cursor="hover"
-                    className="rounded-full border border-[--color-border] px-5 py-2 text-sm text-[--color-fg-muted] transition-colors hover:border-[--color-accent] hover:text-[--color-accent]"
+                    className="rounded-full border border-(--color-border) px-5 py-2 text-sm text-(--color-fg-muted) transition-colors hover:border-(--color-accent) hover:text-(--color-accent)"
                   >
                     GitHub
                   </a>
                   <a
                     href={FRAGMENTS.bolt.href}
                     data-cursor="hover"
-                    className="rounded-full border border-[--color-border] px-5 py-2 text-sm text-[--color-fg-muted] transition-colors hover:border-[--color-accent] hover:text-[--color-accent]"
+                    className="rounded-full border border-(--color-border) px-5 py-2 text-sm text-(--color-fg-muted) transition-colors hover:border-(--color-accent) hover:text-(--color-accent)"
                   >
                     Book a call
                   </a>
@@ -443,7 +443,7 @@ export function JourneyFooter() {
                           duration: reduce ? 0.2 : 0.5,
                           ease: EASE_OUT,
                         }}
-                        className="rounded-full border border-[--color-accent]/60 bg-[--color-accent]/10 px-5 py-2 text-sm text-[--color-accent] transition-colors hover:bg-[--color-accent]/20"
+                        className="rounded-full border border-(--color-accent)/60 bg-(--color-accent)/10 px-5 py-2 text-sm text-(--color-accent) transition-colors hover:bg-(--color-accent)/20"
                       >
                         {fragment.label}
                       </motion.a>
@@ -451,7 +451,7 @@ export function JourneyFooter() {
                       <span
                         key={glyph}
                         aria-hidden
-                        className="select-none rounded-full border border-dashed border-[--color-border] px-5 py-2 text-sm text-[--color-fg-muted]/50"
+                        className="select-none rounded-full border border-dashed border-(--color-border) px-5 py-2 text-sm text-(--color-fg-muted)/50"
                       >
                         · · ·
                       </span>
@@ -466,7 +466,7 @@ export function JourneyFooter() {
                     setSkipped(true);
                   }}
                   data-cursor="hover"
-                  className="mt-8 text-xs uppercase tracking-[0.2em] text-[--color-fg-muted] underline decoration-[--color-border] underline-offset-4 transition-colors hover:text-[--color-accent] hover:decoration-[--color-accent]"
+                  className="mt-8 text-xs uppercase tracking-[0.2em] text-(--color-fg-muted) underline decoration-(--color-border) underline-offset-4 transition-colors hover:text-(--color-accent) hover:decoration-(--color-accent)"
                 >
                   skip the game — just show me the contact
                 </button>

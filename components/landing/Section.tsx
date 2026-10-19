@@ -23,7 +23,7 @@ export function Section({ label, title, children }: SectionProps) {
         transition={{ duration: reduce ? 0.2 : 0.85, ease: EASE_OUT }}
       >
         {label && (
-          <p className="mb-4 text-xs uppercase tracking-[0.3em] text-[--color-fg-muted]">
+          <p className="mb-4 text-xs uppercase tracking-[0.3em] text-(--color-fg-muted)">
             {label}
           </p>
         )}

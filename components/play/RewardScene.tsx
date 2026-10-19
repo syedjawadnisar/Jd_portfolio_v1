@@ -303,7 +303,7 @@ export function RewardScene({ message, onPlayAgain }: RewardSceneProps) {
   return (
     <div className="flex min-h-[100svh] flex-col items-center justify-center px-6 py-24 text-center">
       <motion.p
-        className="mb-8 text-xs uppercase tracking-[0.3em] text-[--color-fg-muted]"
+        className="mb-8 text-xs uppercase tracking-[0.3em] text-(--color-fg-muted)"
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: EASE_OUT }}
@@ -339,15 +339,15 @@ export function RewardScene({ message, onPlayAgain }: RewardSceneProps) {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.35 }}
           >
-            <p className="text-sm text-[--color-fg-muted]">{hint}</p>
+            <p className="text-sm text-(--color-fg-muted)">{hint}</p>
             <div className="flex gap-2" aria-hidden>
               {[0, 1, 2].map((i) => (
                 <span
                   key={i}
                   className={
                     i < clicks
-                      ? "h-1.5 w-1.5 rounded-full bg-[--stage-accent]"
-                      : "h-1.5 w-1.5 rounded-full bg-[--color-border]"
+                      ? "h-1.5 w-1.5 rounded-full bg-(--stage-accent)"
+                      : "h-1.5 w-1.5 rounded-full bg-(--color-border)"
                   }
                 />
               ))}
@@ -365,13 +365,13 @@ export function RewardScene({ message, onPlayAgain }: RewardSceneProps) {
               {message}
             </h1>
 
-            <p className="mt-8 text-xs uppercase tracking-[0.25em] text-[--color-fg-muted]">
+            <p className="mt-8 text-xs uppercase tracking-[0.25em] text-(--color-fg-muted)">
               The real reward is one conversation away
             </p>
             <a
               href={`mailto:${bio.contact.email}`}
               data-cursor="hover"
-              className="mt-4 rounded-full border border-[--stage-accent] bg-[--stage-accent]/10 px-8 py-3 text-sm font-medium uppercase tracking-[0.2em] text-[--stage-accent] transition-colors hover:bg-[--stage-accent]/20"
+              className="mt-4 rounded-full border border-(--stage-accent) bg-(--stage-accent)/10 px-8 py-3 text-sm font-medium uppercase tracking-[0.2em] text-(--stage-accent) transition-colors hover:bg-(--stage-accent)/20"
             >
               Talk to Jawad
             </a>
@@ -382,7 +382,7 @@ export function RewardScene({ message, onPlayAgain }: RewardSceneProps) {
                 type="button"
                 onClick={onPlayAgain}
                 data-cursor="hover"
-                className="rounded-full border border-[--color-border] px-6 py-2.5 text-xs uppercase tracking-[0.2em] text-[--color-fg-muted] transition-colors hover:border-[--stage-accent] hover:text-[--stage-accent]"
+                className="rounded-full border border-(--color-border) px-6 py-2.5 text-xs uppercase tracking-[0.2em] text-(--color-fg-muted) transition-colors hover:border-(--stage-accent) hover:text-(--stage-accent)"
               >
                 Play again
               </button>

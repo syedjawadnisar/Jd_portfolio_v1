@@ -150,10 +150,26 @@ export function Platformer({ stage, onFinish, onContextLost }: PlatformerProps) 
 
   const handleRespawn = useCallback(() => flash.current?.trigger(), []);
 
+  // Unmounting the Canvas forces a context loss on purpose (react-three-fiber
+  // calls forceContextLoss on teardown), and the event lands after this
+  // component is gone. Only a loss while the course is still on screen is a
+  // real failure. Leaving a stage, cleared or skipped, must not end the game.
+  const onCourse = useRef(true);
+  useEffect(() => {
+    onCourse.current = true;
+    return () => {
+      onCourse.current = false;
+    };
+  }, []);
+
   const handleContextLost = useCallback(
     (e: Event) => {
       e.preventDefault();
-      onContextLost();
+      // Checked a task later, so a loss fired during the unmount itself sees
+      // the cleanup above too.
+      setTimeout(() => {
+        if (onCourse.current) onContextLost();
+      }, 0);
     },
     [onContextLost],
   );

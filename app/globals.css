@@ -4,7 +4,10 @@
   --color-bg: oklch(0.13 0.02 270);
   --color-bg-elevated: oklch(0.17 0.025 270);
   --color-fg: oklch(0.96 0.01 270);
-  --color-fg-muted: oklch(0.65 0.02 270);
+  /* 0.78, not 0.65: muted copy sits straight on the moving shader, and over
+     its bright swirls 0.65 fell to about 3:1. At 0.78 the worst measured
+     spot is 5:1 and plain --color-bg is 10:1. */
+  --color-fg-muted: oklch(0.78 0.02 270);
   --color-accent: oklch(0.78 0.18 65);
   --color-accent-soft: oklch(0.88 0.12 65);
   --color-border: oklch(0.25 0.02 270);

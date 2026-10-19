@@ -58,7 +58,7 @@ export const featuredProjects: readonly Project[] = [
     name: "CHIIRP",
     domain: "Marketing Automation",
     impact:
-      "Replaced legacy AJAX with Rails Turbo, and cut the server bill with Sidekiq and query tuning.",
+      "Moved legacy AJAX to Rails Turbo, then the monolith to microservices, with Sidekiq and query tuning that cut the server bill.",
     role: "Led remote development on contract with a US client.",
     stack: ["Ruby on Rails", "Turbo", "React", "Sidekiq", "PostgreSQL"],
     url: "https://chiirp.com",

@@ -10,7 +10,7 @@ const lastModified = new Date();
 const absolute = (path: string) => new URL(path, siteUrl).toString();
 
 /**
- * The three real content routes only.
+ * The four real content routes only.
  *
  * Deliberately absent: /explore (a 308 to "/" — a redirect is not a
  * destination) and the generated image routes (/icon, /apple-icon, every
@@ -24,6 +24,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified,
       changeFrequency: "monthly",
       priority: 1,
+    },
+    {
+      url: absolute("/projects"),
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.9,
     },
     {
       url: absolute("/cinematic"),

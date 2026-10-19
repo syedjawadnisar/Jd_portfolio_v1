@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRef } from "react";
 import {
   motion,
@@ -8,11 +9,14 @@ import {
   useTransform,
   type Variants,
 } from "framer-motion";
-import { featuredProjects, type Project } from "@/data/projects";
+import { featuredProjects, projects, type Project } from "@/data/projects";
 import { numberWord } from "@/lib/experience";
 import { EASE_OUT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import { ProjectVisual } from "./ProjectVisual";
+
+/** Chips past this many collapse into "+N more", so a long stack keeps the row's rhythm. */
+const ROW_STACK_LIMIT = 6;
 
 /** Heading copy stays true to the data, however many projects there are. */
 function headingFor(count: number) {
@@ -134,7 +138,7 @@ function ProjectRow({
         </motion.p>
 
         <motion.ul variants={item} className="mt-6 flex flex-wrap gap-2">
-          {project.stack.map((s) => (
+          {project.stack.slice(0, ROW_STACK_LIMIT).map((s) => (
             <li
               key={s}
               className="rounded-full border border-[--color-border] bg-[--color-bg-elevated]/50 px-3 py-1 text-xs text-[--color-fg-muted] backdrop-blur-sm"
@@ -142,6 +146,11 @@ function ProjectRow({
               {s}
             </li>
           ))}
+          {project.stack.length > ROW_STACK_LIMIT && (
+            <li className="px-1 py-1 text-xs text-[--color-fg-muted]">
+              +{project.stack.length - ROW_STACK_LIMIT} more
+            </li>
+          )}
         </motion.ul>
 
         {project.url && (
@@ -187,13 +196,34 @@ export function ProjectsSection() {
         <div className="space-y-24 md:space-y-36">
           {featuredProjects.map((project, i) => (
             <ProjectRow
-              key={project.name}
+              key={project.slug}
               project={project}
               index={i}
               flipped={i % 2 === 1}
             />
           ))}
         </div>
+
+        <motion.div
+          initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.6 }}
+          transition={{ duration: reduceMotion ? 0.2 : 0.7, ease: EASE_OUT }}
+          className="mt-24 flex flex-col items-center gap-6 text-center md:mt-32"
+        >
+          <p className="max-w-md text-base leading-relaxed text-[--color-fg-muted]">
+            {numberWord(projects.length - featuredProjects.length)} more
+            projects, each with what was built and where.
+          </p>
+          <Link
+            href="/projects"
+            data-cursor="hover"
+            className="inline-flex min-h-11 items-center gap-3 rounded-full border border-[--color-accent] bg-[--color-accent]/10 px-8 py-3 text-sm font-medium uppercase tracking-[0.2em] text-[--color-accent] transition-colors hover:bg-[--color-accent]/20"
+          >
+            See all {projects.length} projects
+            <span aria-hidden>→</span>
+          </Link>
+        </motion.div>
       </div>
     </section>
   );

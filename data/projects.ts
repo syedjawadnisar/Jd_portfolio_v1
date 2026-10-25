@@ -74,6 +74,8 @@ export const projects: readonly Project[] = [
     role: "Full-stack engineer on ingestion, scheduled jobs and the scorecard prompt runner, at Codlinx (formerly Igknight Tech).",
     stack: ["Ruby on Rails", "React", "PostgreSQL", "LLM APIs", "Solid Queue", "TypeScript", "Deepgram", "AWS"],
     featured: true,
+    image: "/images/projects/intelligencex.webp",
+    imageAlt: "Illustration of a call waveform, a ring chart and a scorecard, joined by a stream of light",
   },
   {
     slug: "global-talent-marketplace",

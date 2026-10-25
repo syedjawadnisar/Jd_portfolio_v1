@@ -88,6 +88,8 @@ export const projects: readonly Project[] = [
     role: "Built the billing approval and discount surface end to end, at Codlinx (formerly Igknight Tech).",
     stack: ["React", "TypeScript", "Ruby on Rails", "GraphQL"],
     featured: true,
+    image: "/images/projects/global-talent-marketplace.webp",
+    imageAlt: "Illustration of invoices in different currencies, an approval flow and a discount tag",
   },
   {
     slug: "chiirp",

@@ -8,6 +8,7 @@ import { PathChooser } from "./PathChooser";
 import { ProjectsSection } from "./ProjectsSection";
 import { ScrollCue } from "./ScrollCue";
 import { Section } from "./Section";
+import { WhoSection } from "./WhoSection";
 import ScrollScene from "./ScrollSceneClient";
 import { skillCategories } from "@/data/skills";
 import { JourneyFooter } from "@/components/footer/JourneyFooter";
@@ -53,18 +54,18 @@ export function LandingExperience() {
 
       {/* Everything below is the default experience: the full scroll narrative */}
 
-      <Section
+      <WhoSection
         label="01 — Who"
         title={`Lahore. ${numberWord(years)} years deep. Lead-tier scope.`}
       >
-        <p className="mx-auto max-w-2xl text-balance text-lg leading-relaxed text-(--color-fg-muted)">
+        <p className="mx-auto max-w-2xl text-balance text-lg leading-relaxed text-(--color-fg-muted) md:mx-0">
           I&apos;ve been shipping production systems since 2021 — billing flows that
           move money across borders, AI agents that hold conversations, data pipelines
           that don&apos;t flinch under load. Currently running four projects at once
           under names that read &ldquo;ten years experience.&rdquo; The years aren&apos;t
           the story. The output is.
         </p>
-      </Section>
+      </WhoSection>
 
       <Section
         label="02 — The superpower"

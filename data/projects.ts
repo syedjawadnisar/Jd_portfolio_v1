@@ -102,6 +102,8 @@ export const projects: readonly Project[] = [
     period: "2025",
     featured: true,
     url: "https://chiirp.com",
+    image: "/images/projects/chiirp.webp",
+    imageAlt: "Illustration of a campaign sequence, a conversation and two synced apps over a grid of services",
   },
   {
     slug: "docuseal",

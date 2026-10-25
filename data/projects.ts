@@ -115,6 +115,8 @@ export const projects: readonly Project[] = [
     stack: ["Ruby on Rails", "Vue.js", "PostgreSQL", "PDF tooling"],
     featured: true,
     url: "https://www.docuseal.com",
+    image: "/images/projects/docuseal.webp",
+    imageAlt: "Illustration of a layered document with one region redacted through every layer, beside signature fields",
   },
   {
     slug: "cellcloud",

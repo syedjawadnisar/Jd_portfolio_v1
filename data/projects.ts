@@ -64,6 +64,8 @@ export const projects: readonly Project[] = [
     stack: ["Go", "GraphQL", "PostgreSQL", "AWS SQS", "Stripe", "React", "TypeScript", "AWS Cognito", "AWS CDK"],
     featured: true,
     url: "https://kscope.ai",
+    image: "/images/projects/kscope.webp",
+    imageAlt: "Illustration of a knowledge graph, three plan cards and a usage meter, synced from a layer below",
   },
   {
     slug: "intelligencex",

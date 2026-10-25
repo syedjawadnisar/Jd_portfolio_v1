@@ -51,6 +51,8 @@ export const projects: readonly Project[] = [
     stack: ["TypeScript", "GraphQL", "AWS Lambda", "Terraform", "MongoDB", "React", "Node.js", "AWS GovCloud"],
     period: "2026, ongoing",
     featured: true,
+    image: "/images/projects/public-safety-workforce-platform.webp",
+    imageAlt: "Illustration of a shift-scheduling dashboard and a phone, linked by threads of light",
   },
   {
     slug: "kscope",

@@ -46,7 +46,7 @@ export const projects: readonly Project[] = [
     name: "Public-safety workforce platform",
     domain: "Public safety / AWS GovCloud",
     impact:
-      "Delivered an isolated AWS GovCloud deployment end to end, for a multi-tenant SaaS on Lambda, GraphQL and Terraform.",
+      "Delivered an isolated AWS GovCloud deployment end to end, then cut CI from 25 minutes to 7 and deploy validation from 13 to 6.",
     role: "Full-stack engineer across backend, frontend, infrastructure and release engineering, at Codlinx (formerly Igknight Tech).",
     stack: ["TypeScript", "GraphQL", "AWS Lambda", "Terraform", "MongoDB", "React", "Node.js", "AWS GovCloud"],
     period: "2026, ongoing",

@@ -37,3 +37,12 @@
   Content-Type: image/png
 /apple-icon
   Content-Type: image/png
+
+# The production build carries the real domain in its canonical tags and
+# robots.txt, so the same files on the project's pages.dev hosts would read as
+# a second indexable copy. These hosts get noindex. dev.jawadnisar.com does not
+# match either pattern.
+https://:project.pages.dev/*
+  X-Robots-Tag: noindex
+https://:version.:project.pages.dev/*
+  X-Robots-Tag: noindex

@@ -2,6 +2,8 @@ import { ImageResponse } from "next/og";
 
 export const size = { width: 32, height: 32 };
 export const contentType = "image/png";
+// The static export prerenders every image route, so each must say so.
+export const dynamic = "force-static";
 
 /**
  * The tab-strip monogram. Authored in code so there is no binary asset in the

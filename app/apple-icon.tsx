@@ -2,6 +2,8 @@ import { ImageResponse } from "next/og";
 
 export const size = { width: 180, height: 180 };
 export const contentType = "image/png";
+// The static export prerenders every image route, so each must say so.
+export const dynamic = "force-static";
 
 /**
  * Home-screen icon for iOS, which applies its own mask — the monogram stays

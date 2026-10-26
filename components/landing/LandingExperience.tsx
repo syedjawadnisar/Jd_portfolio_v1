@@ -61,7 +61,7 @@ export function LandingExperience() {
         <p className="mx-auto max-w-2xl text-balance text-lg leading-relaxed text-(--color-fg-muted) md:mx-0">
           I&apos;ve been shipping production systems since 2021 — billing flows that
           move money across borders, AI agents that hold conversations, data pipelines
-          that don&apos;t flinch under load. Currently running four projects at once
+          that don&apos;t flinch under load. Currently running three projects at once
           under names that read &ldquo;ten years experience.&rdquo; The years aren&apos;t
           the story. The output is.
         </p>

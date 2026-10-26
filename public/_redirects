@@ -1,0 +1,6 @@
+# Cloudflare Pages redirects. The export copies this file into out/.
+#
+# /explore was the scroll experience before it became the default behaviour of
+# "/". Shared and indexed links keep resolving, answered before any page loads.
+/explore / 308
+/explore/ / 308

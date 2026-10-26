@@ -1,0 +1,39 @@
+# Cloudflare Pages response headers. The export copies this file into out/.
+#
+# Every path gets the security headers. None of them changes what a page may
+# load, only how the browser may treat it. Content-Security-Policy is
+# deliberately absent: framer-motion writes inline styles on every animated
+# element and rapier instantiates WebAssembly, so a policy needs at least
+# style-src 'unsafe-inline' and a wasm source, and a wrong one silently blanks
+# the experience. It needs a report-only rollout against the live site first.
+# HSTS has no includeSubDomains and no preload, because neither is reversible
+# on a timescale a portfolio can afford.
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: SAMEORIGIN
+  Referrer-Policy: strict-origin-when-cross-origin
+  Cross-Origin-Opener-Policy: same-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+  Strict-Transport-Security: max-age=63072000
+
+# The generated images are written as files with no extension, and Pages takes
+# Content-Type from the extension, so without these rules they go out as
+# application/octet-stream and link unfurlers refuse them. The cache stays
+# short because pages reference these URLs without a build hash in the path,
+# and a long one would pin a stale card in unfurler caches after a deploy.
+/opengraph-image
+  Content-Type: image/jpeg
+  Cache-Control: public, max-age=3600
+/cinematic/opengraph-image
+  Content-Type: image/jpeg
+  Cache-Control: public, max-age=3600
+/play/opengraph-image
+  Content-Type: image/jpeg
+  Cache-Control: public, max-age=3600
+/projects/opengraph-image
+  Content-Type: image/jpeg
+  Cache-Control: public, max-age=3600
+/icon
+  Content-Type: image/png
+/apple-icon
+  Content-Type: image/png

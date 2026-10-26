@@ -8,7 +8,7 @@ const title = "The Interactive Journey";
 const ogTitle = `${title} — ${bio.name}`;
 const description =
   "A playable path through the portfolio: three questions, three worlds, one mystery box.";
-const url = new URL("/play", siteUrl).toString();
+const url = new URL("/play/", siteUrl).toString();
 
 export const metadata: Metadata = {
   title,

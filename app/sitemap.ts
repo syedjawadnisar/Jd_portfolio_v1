@@ -19,26 +19,26 @@ const absolute = (path: string) => new URL(path, siteUrl).toString();
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     {
-      // The bare origin — the exact string the root canonical emits.
-      url: siteUrl,
+      // The root with its slash, the exact string the root canonical emits.
+      url: absolute("/"),
       lastModified,
       changeFrequency: "monthly",
       priority: 1,
     },
     {
-      url: absolute("/projects"),
+      url: absolute("/projects/"),
       lastModified,
       changeFrequency: "monthly",
       priority: 0.9,
     },
     {
-      url: absolute("/cinematic"),
+      url: absolute("/cinematic/"),
       lastModified,
       changeFrequency: "yearly",
       priority: 0.8,
     },
     {
-      url: absolute("/play"),
+      url: absolute("/play/"),
       lastModified,
       changeFrequency: "yearly",
       priority: 0.8,

@@ -11,8 +11,8 @@ import { siteUrl } from "@/lib/site";
 const ogTitle = `${bio.name} — ${bio.title}`;
 const description =
   "Pick a path — the 50-second cut or the playable one — or just keep scrolling for the whole story.";
-// The bare origin, matching the form Next emits for the root canonical.
-const url = siteUrl;
+// The root with its slash, the form Next emits for the root canonical.
+const url = new URL("/", siteUrl).toString();
 
 export const metadata: Metadata = {
   title: { absolute: ogTitle },

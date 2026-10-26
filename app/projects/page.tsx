@@ -9,7 +9,7 @@ const title = "All Projects";
 const ogTitle = `${title} — ${bio.name}`;
 const description =
   "Every project in one place: what was built, where, and on what stack, from a GovCloud SaaS to AI agents.";
-const url = new URL("/projects", siteUrl).toString();
+const url = new URL("/projects/", siteUrl).toString();
 
 export const metadata: Metadata = {
   title,

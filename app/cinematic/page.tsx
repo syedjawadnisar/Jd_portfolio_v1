@@ -9,7 +9,7 @@ const title = "The 50-Second Cut";
 const ogTitle = `${title} — ${bio.name}`;
 const description =
   "The hands-free cinematic cut: who, what, and why — in under a minute.";
-const url = new URL("/cinematic", siteUrl).toString();
+const url = new URL("/cinematic/", siteUrl).toString();
 
 export const metadata: Metadata = {
   title,

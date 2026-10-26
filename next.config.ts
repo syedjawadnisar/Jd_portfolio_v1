@@ -1,37 +1,24 @@
 import type { NextConfig } from "next";
 
 /**
- * Response headers that are safe without a runtime test pass: none of them
- * change what the page is allowed to load, only how the browser is allowed to
- * treat it. Expressed through `next.config.ts` rather than a platform config
- * file so they travel with the app on either host.
+ * Static export for Cloudflare Pages: `next build` writes plain HTML, CSS and
+ * JS to `out/`, and nothing runs on a server.
  *
- * Deliberately absent: Content-Security-Policy. framer-motion writes inline
- * styles on every animated element and rapier instantiates WebAssembly, so a
- * policy needs `style-src 'unsafe-inline'` plus a wasm source at minimum —
- * and a wrong one silently blanks the experience. It needs a report-only
- * rollout against the real deployment, not a guess before the first deploy.
+ * What follows from that:
+ *  - Response headers and the /explore redirect live in `public/_headers` and
+ *    `public/_redirects`, which Pages reads. `headers()` and `redirects()`
+ *    here would not reach an export.
+ *  - next/image has no optimizer, hence `unoptimized`. Images ship pre-sized.
+ *  - `trailingSlash` writes each route as `<route>/index.html`, which Pages
+ *    resolves without guesswork and reaches from `/play` with a 308. The
+ *    canonical URLs and the sitemap carry the slash, so none points at a
+ *    redirect.
  */
-const securityHeaders = [
-  { key: "X-Content-Type-Options", value: "nosniff" },
-  { key: "X-Frame-Options", value: "SAMEORIGIN" },
-  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-  { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
-  {
-    key: "Permissions-Policy",
-    value: "camera=(), microphone=(), geolocation=(), payment=()",
-  },
-  // Both candidate hosts serve HTTPS only. No includeSubDomains and no
-  // preload: neither is reversible on a timescale a portfolio can afford.
-  { key: "Strict-Transport-Security", value: "max-age=63072000" },
-];
-
 const nextConfig: NextConfig = {
+  output: "export",
+  trailingSlash: true,
+  images: { unoptimized: true },
   reactStrictMode: true,
-
-  // Nothing is gained by advertising the framework and its version in every
-  // response header.
-  poweredByHeader: false,
 
   experimental: {
     // `three` is deliberately absent: the flag rewrites named imports into
@@ -39,21 +26,6 @@ const nextConfig: NextConfig = {
     // which it cannot touch. drei and framer-motion are both barrel packages
     // imported by name, so they are the two that actually benefit.
     optimizePackageImports: ["@react-three/drei", "framer-motion"],
-  },
-
-  /**
-   * `/explore` was the scroll experience before it became the default
-   * behavior of `/`. Shared and indexed links have to keep resolving, but
-   * that is a routing concern, not a page: as a `permanentRedirect()` page it
-   * cost a prerendered route and a React render to emit one header. Here the
-   * answer comes before any rendering happens.
-   */
-  async redirects() {
-    return [{ source: "/explore", destination: "/", permanent: true }];
-  },
-
-  async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
   },
 };
 

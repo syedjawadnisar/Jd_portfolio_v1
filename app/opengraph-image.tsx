@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 import { bio } from "@/data/bio";
-import { OG_CONTENT_TYPE, OG_SIZE, OgCard } from "@/lib/og";
+import { OG_CONTENT_TYPE, OG_SIZE, OgCard, ogPortrait } from "@/lib/og";
 
 export const alt = "Jawad Nisar — Senior Full-Stack & AI Architect";
 export const size = OG_SIZE;
@@ -10,6 +10,7 @@ export const contentType = OG_CONTENT_TYPE;
  * The shared-link card. Generated at build time so there is no binary asset
  * to keep in sync with the copy — it reads from data/bio.ts like the site.
  */
-export default function OpengraphImage() {
-  return new ImageResponse(<OgCard headline={bio.motto} />, size);
+export default async function OpengraphImage() {
+  const portrait = await ogPortrait();
+  return new ImageResponse(<OgCard headline={bio.motto} portrait={portrait} />, size);
 }

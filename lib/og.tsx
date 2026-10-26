@@ -1,3 +1,5 @@
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { bio } from "@/data/bio";
 
 /**
@@ -20,18 +22,35 @@ const FG = "#f4f4f8";
 const FG_MUTED = "#9a9ab0";
 const ACCENT = "#e8b464";
 
+/** The portrait cut-out, faded at its edges in the file itself: satori has no CSS masks. */
+const PORTRAIT = { width: 470, height: 630 };
+
+let portraitData: Promise<string> | undefined;
+
+/** The portrait as a data URL, read once per build. Cards render at build time only. */
+export function ogPortrait(): Promise<string> {
+  portraitData ??= readFile(join(process.cwd(), "assets/og-portrait.png")).then(
+    (png) => `data:image/png;base64,${png.toString("base64")}`,
+  );
+  return portraitData;
+}
+
 export function OgCard({
   headline,
   subline,
   headlineSize = 78,
+  portrait,
 }: {
   headline: string;
   subline?: string;
   headlineSize?: number;
+  /** Data URL from ogPortrait(). The copy narrows to leave it the right side. */
+  portrait?: string;
 }) {
   return (
     <div
       style={{
+        position: "relative",
         width: "100%",
         height: "100%",
         display: "flex",
@@ -43,6 +62,16 @@ export function OgCard({
         fontSize: 32,
       }}
     >
+      {portrait ? (
+        // eslint-disable-next-line @next/next/no-img-element -- satori renders this, not a browser
+        <img
+          src={portrait}
+          alt=""
+          width={PORTRAIT.width}
+          height={PORTRAIT.height}
+          style={{ position: "absolute", right: 0, bottom: 0 }}
+        />
+      ) : null}
       <div
         style={{
           display: "flex",
@@ -55,7 +84,7 @@ export function OgCard({
         {bio.name} — {bio.location}
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", maxWidth: 960 }}>
+      <div style={{ display: "flex", flexDirection: "column", maxWidth: portrait ? 640 : 960 }}>
         <div
           style={{
             display: "flex",

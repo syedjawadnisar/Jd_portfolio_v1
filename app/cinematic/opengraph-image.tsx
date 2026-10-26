@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { OG_CONTENT_TYPE, OG_SIZE, OgCard } from "@/lib/og";
+import { OG_CONTENT_TYPE, OG_SIZE, OgCard, ogPortrait } from "@/lib/og";
 
 export const alt = "The 50-Second Cut — Jawad Nisar";
 export const size = OG_SIZE;
@@ -11,13 +11,15 @@ export const contentType = OG_CONTENT_TYPE;
  * never reaches this route. A file-convention image sits in the same segment
  * as the page and merges into that declaration.
  */
-export default function CinematicOpengraphImage() {
+export default async function CinematicOpengraphImage() {
+  const portrait = await ogPortrait();
   return new ImageResponse(
     (
       <OgCard
         headline="The 50-second cut."
         subline="Hands-free. Highlights only. The fastest path to a conversation."
         headlineSize={92}
+        portrait={portrait}
       />
     ),
     size,

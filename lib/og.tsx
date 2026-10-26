@@ -1,11 +1,14 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
+import { ImageResponse } from "next/og";
+import type { ReactElement } from "react";
+import sharp from "sharp";
 import { bio } from "@/data/bio";
 
 /**
  * The shared layout behind every generated share card.
  *
- * Three routes emit one — the root, /cinematic and /play — and a card that
+ * Four routes emit one — the root, /cinematic, /play and /projects — and a card that
  * drifts from its siblings looks like a different person's site in a Slack
  * unfurl. One layout, per-route copy.
  *
@@ -14,7 +17,7 @@ import { bio } from "@/data/bio";
  * `display: flex` explicitly.
  */
 export const OG_SIZE = { width: 1200, height: 630 };
-export const OG_CONTENT_TYPE = "image/png";
+export const OG_CONTENT_TYPE = "image/jpeg";
 
 const BG = "#0c0d18";
 const BG_LIFT = "#1b1c2e";
@@ -33,6 +36,21 @@ export function ogPortrait(): Promise<string> {
     (png) => `data:image/png;base64,${png.toString("base64")}`,
   );
   return portraitData;
+}
+
+/**
+ * Renders a card as JPEG. ImageResponse only emits PNG, and with the photo in
+ * it the PNG weighs about 486 KB, past the size where WhatsApp previews start
+ * to fail. Quality 90 with full colour resolution keeps the gold type free of
+ * fringing at about 82 KB.
+ */
+export async function ogImage(card: ReactElement): Promise<Response> {
+  const png = Buffer.from(await new ImageResponse(card, OG_SIZE).arrayBuffer());
+  const jpeg = await sharp(png)
+    .flatten({ background: BG })
+    .jpeg({ quality: 90, chromaSubsampling: "4:4:4", mozjpeg: true })
+    .toBuffer();
+  return new Response(new Uint8Array(jpeg), { headers: { "Content-Type": OG_CONTENT_TYPE } });
 }
 
 export function OgCard({

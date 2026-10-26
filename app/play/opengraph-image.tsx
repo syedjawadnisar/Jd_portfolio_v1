@@ -1,5 +1,4 @@
-import { ImageResponse } from "next/og";
-import { OG_CONTENT_TYPE, OG_SIZE, OgCard, ogPortrait } from "@/lib/og";
+import { OG_CONTENT_TYPE, OG_SIZE, OgCard, ogImage, ogPortrait } from "@/lib/og";
 
 export const alt = "The Interactive Journey — Jawad Nisar";
 export const size = OG_SIZE;
@@ -11,15 +10,12 @@ export const contentType = OG_CONTENT_TYPE;
  */
 export default async function PlayOpengraphImage() {
   const portrait = await ogPortrait();
-  return new ImageResponse(
-    (
-      <OgCard
-        headline="The interactive journey."
-        subline="Three questions, three worlds, one mystery box. A mini platformer, not a form."
-        headlineSize={92}
-        portrait={portrait}
-      />
-    ),
-    size,
+  return ogImage(
+    <OgCard
+      headline="The interactive journey."
+      subline="Three questions, three worlds, one mystery box. A mini platformer, not a form."
+      headlineSize={92}
+      portrait={portrait}
+    />,
   );
 }

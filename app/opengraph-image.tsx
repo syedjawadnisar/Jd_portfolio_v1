@@ -1,6 +1,5 @@
-import { ImageResponse } from "next/og";
 import { bio } from "@/data/bio";
-import { OG_CONTENT_TYPE, OG_SIZE, OgCard, ogPortrait } from "@/lib/og";
+import { OG_CONTENT_TYPE, OG_SIZE, OgCard, ogImage, ogPortrait } from "@/lib/og";
 
 export const alt = "Jawad Nisar — Senior Full-Stack & AI Architect";
 export const size = OG_SIZE;
@@ -12,5 +11,5 @@ export const contentType = OG_CONTENT_TYPE;
  */
 export default async function OpengraphImage() {
   const portrait = await ogPortrait();
-  return new ImageResponse(<OgCard headline={bio.motto} portrait={portrait} />, size);
+  return ogImage(<OgCard headline={bio.motto} portrait={portrait} />);
 }

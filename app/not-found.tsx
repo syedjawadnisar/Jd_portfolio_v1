@@ -3,7 +3,7 @@ import Link from "next/link";
 import { bio, paths } from "@/data/bio";
 
 export const metadata: Metadata = {
-  title: "No such route — Jawad Nisar",
+  title: "No such route",
   description: "That address doesn't resolve. These three do.",
 };
 
